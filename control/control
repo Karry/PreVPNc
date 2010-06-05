@@ -1,0 +1,8 @@
+Package: cz.karry.vpnc
+Version: 0.1.0
+Section: misc
+Priority: optional
+Architecture: all
+Maintainer: Lukas Karas <karry.cz@gmail.cz>
+Description: WebOS VPN Client
+Source: {"Source":"http://webosvpnc.googlecode.com","Homepage":"http://webosvpnc.googlecode.com","Category":"Services and Plugins","License":"GNU GPLv2","Type":"Service","FullDescription":"VPN client for webOS devices. Is support MS PPTP VPN only meanwhile.","PostRemoveFlags":"RestartJava","PostUpdateFlags":"RestartJava","Title":"WebOS VPN Client","PostInstallFlags":"RestartJava"}

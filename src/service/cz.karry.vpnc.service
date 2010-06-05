@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=cz.karry.vpnc
+Exec=/usr/bin/luna-helper 'luna://com.palm.vm/launch' '{"serviceName":"cz.karry.vpnc","className":"cz.karry.vpnc.LunaService"}'

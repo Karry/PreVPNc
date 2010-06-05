@@ -1,0 +1,14 @@
+{
+  "id":"cz.karry.vpnc",
+  "version":"0.1.0",
+  "title":"PreVPNc",
+  "vendor":"Company",
+  "vendorurl":"http://",
+  "main":"index.html",
+  "icon":"images/icon.png",
+  "miniicon":"miniicon.png",
+  "type":"web",
+  "theme":"light",
+  "noWindow":false,
+  "noDeprecatedStyles":true
+}
