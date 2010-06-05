@@ -38,6 +38,7 @@ public class PptpConnection extends VpnConnection {
     BufferedReader stdout = null;
     BufferedReader stderr = null;
     String[] command = String.format("chroot /opt/vpnbox /usr/sbin/pppd call %s", profileName).split(" ");
+    long poolInterval = 50;
 
     try {
       try {
@@ -73,13 +74,17 @@ public class PptpConnection extends VpnConnection {
                 this.localAddress = line.substring("local  IP address".length());
                 synchronized (connectionLock) {
                   this.connectionState = ConnectionState.CONNECTED;
+                  poolInterval = 300;
                   connectionLock.notifyAll();
                 }
               }
               this.log += "\n" + line;
             }
           }
-
+          try{
+            Thread.sleep(poolInterval);
+          }catch(InterruptedException ie){}
+          
         }
         synchronized (connectionLock) {
           connectionLock.notifyAll();
