@@ -1,0 +1,30 @@
+#!/bin/sh
+
+if [ -z "$IPKG_OFFLINE_ROOT" ]; then
+  echo "/usr/sbin/rootfs_open -w" > /var/remount.sh
+  sh /var/remount.sh
+  if [ $? -ne 0 ]; then
+  	echo "Error remounting root partition read-write."
+  	echo "Reboot device then try installing again."
+  	exit 1
+  fi
+fi
+
+APP_PATH=/media/cryptofs/apps/usr/palm/applications/cz.karry.vpnc
+
+/bin/cp -f $APP_PATH/service/VpnService.jar /usr/lib/luna/java/VpnService.jar
+
+/bin/cp -f $APP_PATH/service/cz.karry.vpnc.service /usr/share/dbus-1/system-services/cz.karry.vpnc.service
+
+/bin/cp -f $APP_PATH/service/cz.karry.vpnc /etc/event.d/cz.karry.vpnc
+
+cd /opt
+zcat $APP_PATH/vpnbox.tar.gz | tar -xf -
+rm $APP_PATH/vpnbox.tar.gz
+
+if [ -z "$IPKG_OFFLINE_ROOT" ]; then
+  killall -9 java
+  mount -o remount,ro /
+fi
+
+exit 0
