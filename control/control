@@ -5,4 +5,4 @@ Priority: optional
 Architecture: all
 Maintainer: Lukas Karas <karry.cz@gmail.cz>
 Description: WebOS VPN Client
-Source: {"Source":"http://webosvpnc.googlecode.com","Homepage":"http://webosvpnc.googlecode.com","Category":"Services and Plugins","License":"GNU GPLv2","Type":"Service","FullDescription":"VPN client for webOS devices. It support MS PPTP VPN only meanwhile.","PostRemoveFlags":"RestartJava","PostUpdateFlags":"RestartJava","Title":"WebOS VPN Client","PostInstallFlags":"RestartJava"}
+Source: {"Source":"http://webosvpnc.googlecode.com","Homepage":"http://prevpnc.googlecode.com","Category":"Services and Plugins","License":"GNU GPLv2","Type":"Service","FullDescription":"VPN client for webOS devices. It support MS PPTP VPN only meanwhile.","PostRemoveFlags":"RestartJava","PostUpdateFlags":"RestartJava","Title":"WebOS VPN Client","PostInstallFlags":"RestartJava"}
