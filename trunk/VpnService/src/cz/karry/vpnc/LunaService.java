@@ -89,7 +89,7 @@ public class LunaService extends LunaServiceThread {
     String user = jsonObj.getString("user");
     String pass = jsonObj.getString("pass");
 
-    if (!name.matches("^[a-zA-Z]{1}[a-zA-Z0-9]*$")){
+    if (!name.matches("^[a-zA-Z]{1}[a-zA-Z0-9]*$")) {
       msg.respondError("2", "Bad session name format.");
       return;
     }
@@ -106,45 +106,42 @@ public class LunaService extends LunaServiceThread {
     String serviceLog = "";
     JSONObject reply = new JSONObject();
     try {
-      try {
-        if (!loadModules()) {
-          msg.respondError("101", "Can't load kernel modules.");
-          return;
-        }
-        serviceLog += "modules loaded\n";
-
-        // write user name and password to secrets file
-        String[] arr = new String[5];
-        arr[0] = String.format("%s/scripts/write_config.sh", APP_ROOT);
-        arr[1] = String.format("%s", name);
-        arr[2] = String.format("%s", host);
-        arr[3] = String.format("%s", user);
-        arr[4] = String.format("%s", pass);
-        CommandLine cmd = new CommandLine(arr);
-        if (!cmd.doCmd())
-          throw new IOException(cmd.getResponse());
-
-        serviceLog += "config writed\n";
-
-        PptpConnection conn = new PptpConnection(name);
-        VpnConnection original = vpnConnections.put(name, conn);
-        if (original != null)
-          original.diconnect();
-
-        conn.start();
-        serviceLog += "connection started\n";
-        conn.waitWhileConnecting();
-        if (conn.getConnectionState() == VpnConnection.ConnectionState.FAILED) {
-          msg.respondError("103", "Error while connecting: " + conn.getLog());
-          return;
-        }
-        serviceLog += "connected\n";
-        reply.put("localAddress", conn.getLocalAddress());
-        reply.put("log", conn.getLog());
-      } finally {
-        reply.put("serviceLog", serviceLog);
-        msg.respond(reply.toString());
+      if (!loadModules()) {
+        msg.respondError("101", "Can't load kernel modules.");
+        return;
       }
+      serviceLog += "modules loaded\n";
+
+      // write user name and password to secrets file
+      String[] arr = new String[5];
+      arr[0] = String.format("%s/scripts/write_config.sh", APP_ROOT);
+      arr[1] = String.format("%s", name);
+      arr[2] = String.format("%s", host);
+      arr[3] = String.format("%s", user);
+      arr[4] = String.format("%s", pass);
+      CommandLine cmd = new CommandLine(arr);
+      if (!cmd.doCmd())
+        throw new IOException(cmd.getResponse());
+
+      serviceLog += "config writed\n";
+
+      PptpConnection conn = new PptpConnection(name);
+      VpnConnection original = vpnConnections.put(name, conn);
+      if (original != null)
+        original.diconnect();
+
+      conn.start();
+      conn.waitWhileConnecting();
+      if (conn.getConnectionState() == VpnConnection.ConnectionState.FAILED) {
+        serviceLog += "connecting failed\n";
+        msg.respondError("103", "Error while connecting: " + conn.getLog());
+        return;
+      }
+      serviceLog += "connected\n";
+      reply.put("localAddress", conn.getLocalAddress());
+      reply.put("log", conn.getLog());
+      reply.put("serviceLog", serviceLog);
+      msg.respond(reply.toString());
     } catch (Exception ex) {
       msg.respondError("102", "Error while connecting: " + ex.getMessage() + " (" + ex.getClass().getName() + ")");
       return;
