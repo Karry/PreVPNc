@@ -68,7 +68,7 @@ MainAssistant.prototype.buttonEvent = function(event){
 }
 
 MainAssistant.prototype.connectedHandler = function(obj){
-    $('msg').innerHTML = Object.toJSON(obj);
+    $('msg').innerHTML = "connected, result: "+Object.toJSON(obj);
 
 	var network = this.controller.get("network").value;
 	var gateway = this.controller.get("gateway").value;
@@ -87,7 +87,7 @@ MainAssistant.prototype.connectedHandler = function(obj){
 }
 
 MainAssistant.prototype.connectingFailedHandler = function(event){
-    $('msg').innerHTML = Object.toJSON(event);
+    $('msg').innerHTML = "connection failed, result: "+Object.toJSON(event);
 }
 MainAssistant.prototype.routeSetHandler = function(event){
     $('msg2').innerHTML = Object.toJSON(event);
