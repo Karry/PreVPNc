@@ -30,7 +30,7 @@ MainAssistant.prototype.setup = function(){
     if (this.gatewayCookie.get() != undefined)
         this.controller.get("gateway").value = this.gatewayCookie.get();
 	
-	
+	this.log = "";
     this.controller.listen('btn', Mojo.Event.tap, this.buttonEvent.bind(this));    
 }
 
@@ -68,22 +68,26 @@ MainAssistant.prototype.buttonEvent = function(event){
 }
 
 MainAssistant.prototype.connectedHandler = function(obj){
+	//this.log = this.log+"   \n"+Object.toJSON(obj);
+    //$('msg').innerHTML = this.log; 
     $('msg').innerHTML = "connected, result: "+Object.toJSON(obj);
 
-	var network = this.controller.get("network").value;
-	var gateway = this.controller.get("gateway").value;
-    this.controller.serviceRequest('luna://cz.karry.vpnc',
-		                               {
-		                                  method: 'addRoute',	
-		                                  parameters:
-										  {
-											network: network,
-											gateway: gateway
-		                                  },
-		                                  onSuccess: this.routeSetHandler.bind(this),
-		                                  onFailure: this.routeSetHandler.bind(this)
-	                                   }
-									   );
+	if (obj.state == "CONNECTED" && obj.stateChanged){
+		var network = this.controller.get("network").value;
+		var gateway = this.controller.get("gateway").value;
+		this.controller.serviceRequest('luna://cz.karry.vpnc',
+										   {
+											  method: 'addRoute',	
+											  parameters:
+											  {
+												network: network,
+												gateway: gateway
+											  },
+											  onSuccess: this.routeSetHandler.bind(this),
+											  onFailure: this.routeSetHandler.bind(this)
+										   }
+										   );
+	}	
 }
 
 MainAssistant.prototype.connectingFailedHandler = function(event){

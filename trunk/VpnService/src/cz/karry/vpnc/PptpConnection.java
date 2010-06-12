@@ -20,7 +20,7 @@ public class PptpConnection extends VpnConnection {
   @Override
   public void waitWhileConnecting() throws InterruptedException {
     synchronized (connectionLock) {
-      if (connectionState == ConnectionState.CONNECTING)
+      if (getConnectionState() == ConnectionState.CONNECTING)
         connectionLock.wait();
     }
   }
@@ -29,7 +29,7 @@ public class PptpConnection extends VpnConnection {
   public synchronized void start() {
     super.start();
     synchronized (connectionLock) {
-      this.connectionState = ConnectionState.CONNECTING;
+      this.setConnectionState( ConnectionState.CONNECTING );
     }
   }
 
@@ -48,8 +48,8 @@ public class PptpConnection extends VpnConnection {
         stdout = new BufferedReader(new InputStreamReader(process.getInputStream()));
         stderr = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 
-        while (connectionState == ConnectionState.CONNECTING
-                || connectionState == ConnectionState.CONNECTED) {
+        while (getConnectionState() == ConnectionState.CONNECTING
+                || getConnectionState() == ConnectionState.CONNECTED) {
           if (stdout.ready() || stderr.ready()) {
             String line = null;
             if (stdout.ready()) {
@@ -62,18 +62,18 @@ public class PptpConnection extends VpnConnection {
               this.returnCode = process.exitValue();
               if (returnCode == 0) {
                 synchronized (connectionLock) {
-                  connectionState = ConnectionState.INACTIVE;
+                  this.setConnectionState( ConnectionState.INACTIVE );
                 }
               } else {
                 synchronized (connectionLock) {
-                  connectionState = ConnectionState.FAILED;
+                  this.setConnectionState( ConnectionState.FAILED );
                 }
               }
             } else {
               if (line.startsWith("local  IP address")) {
                 this.localAddress = line.substring("local  IP address".length());
                 synchronized (connectionLock) {
-                  this.connectionState = ConnectionState.CONNECTED;
+                  this.setConnectionState( ConnectionState.CONNECTED );
                   poolInterval = 300;
                   connectionLock.notifyAll();
                 }
@@ -106,12 +106,14 @@ public class PptpConnection extends VpnConnection {
   @Override
   public void diconnect() {
     synchronized (connectionLock) {
-      if (connectionState == ConnectionState.CONNECTING
-              || connectionState == ConnectionState.CONNECTED) {
+      if (getConnectionState() == ConnectionState.CONNECTING
+              || getConnectionState() == ConnectionState.CONNECTED) {
         if (this.process != null)
           this.process.destroy();
       }
     }
   }
+
+
 }
 
