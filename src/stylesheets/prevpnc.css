@@ -1,1 +1,16 @@
-/* Put Application specific CSS here. */
+
+
+.palm-page-header .header-icon.prevpnc-icon32{
+    background: url(../images/icon32.png) no-repeat;
+}
+
+.warning{
+    margin:10px 5px 10px 5px;
+    padding:2px;
+    border:1px solid #f99;
+    font-size:small;
+    color:#833;
+}
+.warning h3{
+    margin:0px;
+}
