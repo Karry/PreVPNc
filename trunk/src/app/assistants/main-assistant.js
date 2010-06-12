@@ -1,3 +1,4 @@
+
 function MainAssistant(){
 	/* this is the creator function for your scene assistant object. It will be passed all the 
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
@@ -6,6 +7,33 @@ function MainAssistant(){
 }
 
 MainAssistant.prototype.setup = function(){
+	
+    // Store references to reduce the use of controller.get()
+    this.profileList = this.controller.get('profileList');
+	
+    // Set up a few models so we can test setting the widget model:
+    this.currentModel = {listTitle:$L('VPN profiles'), items:[]};
+	
+    // Set up the attributes for the list widget:
+    this.profileAtts = {
+            itemTemplate:'main/listitem',
+            listTemplate:'main/listcontainer',
+            showAddItem:true,
+			addItemLabel:$L("Add..."),			
+            swipeToDelete:false,
+            reorderable:false,
+            emptyTemplate:'main/emptylist'
+    };
+
+    this.controller.setupWidget('profileList', this.profileAtts , this.currentModel);
+	
+    this.controller.listen(this.profileList, Mojo.Event.listAdd, this.listAddHandler.bind(this));
+    this.controller.listen(this.profileList, Mojo.Event.listTap, this.handleTrackTap.bind(this));
+	
+	this.addProfile({name:"test", state:"???", type:"pptp"});
+	VpnManager.getInstance().loadProfiles( this.addProfile.bind(this) , this.tableErrorHandler.bind(this));
+
+	/*
     this.nameCookie = new Mojo.Model.Cookie( 'name' );
     if (this.nameCookie.get() != undefined)
         this.controller.get("name").value = this.nameCookie.get();
@@ -31,11 +59,88 @@ MainAssistant.prototype.setup = function(){
         this.controller.get("gateway").value = this.gatewayCookie.get();
 	
 	this.log = "";
-    this.controller.listen('btn', Mojo.Event.tap, this.buttonEvent.bind(this));    
+    this.controller.listen('btn', Mojo.Event.tap, this.buttonEvent.bind(this));
+	*/
 }
 
-MainAssistant.prototype.buttonEvent = function(event){
+MainAssistant.prototype.tableErrorHandler = function(transaction, error){
+    $('trackHeadermsg').update('Error: ' + error.message + ' (Code ' + error.code + ')');
+    return true;
+}
+
+MainAssistant.prototype.addProfile = function(item){
+	this.currentModel.items.push(item);
+    //this.profileList.mojo.noticeAddedItems(this.currentModel.items.length, [item]);	
+    //this.profileList.mojo.revealItem(350, true);
+}
+
+
+MainAssistant.prototype.reveal = function(){
+    this.profileList.mojo.revealItem(350, true);
+}
+
+MainAssistant.prototype.listAddHandler = function(event){
+    Mojo.Controller.stageController.pushScene("edit",{});	
+}
+
+MainAssistant.prototype.listDeleteHandler = function(event){
 	
+	this.currentModel.items.splice(this.currentModel.items.indexOf(event.item), 1);
+    Mojo.log("EditablelistAssistant deleting '"+event.item.data+"'.");
+	VpnManager.getInstance().deleteProfile( event.item,
+			function(){
+				 if (event.type == "mojo-list-tap") // event from context menu, not from "slide" delete
+					 this.controller.modelChanged(this.currentModel);
+			},
+			this.tableErrorHandler.bind(this));
+}
+
+MainAssistant.prototype.handleTrackTap = function(event){
+
+	var profilePopupModel = [];
+	var i = 0;
+	if (event.item.state == "CONNECTED"){
+		profilePopupModel[i++] = {label: $L('Disconnect'), command: 'disconnect'};
+	}else{
+		profilePopupModel[i++] = {label: $L('Connect'), command: 'connect'};
+	}
+	profilePopupModel[i++] = {label: $L('Edit'), command: 'edit'};
+	if (event.item.state != "INACTIVE"){
+		profilePopupModel[i++] = {label: $L('Show log'), command: 'showLog'};
+	}
+	profilePopupModel[i++] = {label: $L('Delete'), command: 'delete'};
+
+    this.controller.popupSubmenu({
+        onChoose: function(response){
+            if (response == 'connect') {
+				this.connect( event.item );
+			} else if (response == "edit"){
+				Mojo.Controller.stageController.pushScene("edit",{profile: event.item});			
+            } else if (response == 'delete') {
+                this.controller.showAlertDialog({
+                    onChoose: function(value) {
+                        if (value == 'yes') {
+                            this.listDeleteHandler(event);
+                        }
+                    }.bind(this),
+                    title: $L("Delete?"),
+                    message: $L("Are you sure you want to delete profile #{profilename}?")
+                            .interpolate({profilename:"\"" + event.item.name +"\""}),
+                    choices:[
+                        {label:$L('Yes'), value:"yes", type:'affirmative'},
+                        {label:$L('No'), value:"no", type:'negative'}
+                    ]
+                });
+            }
+        },
+        placeNear: event.originalEvent.target,
+        items: profilePopupModel
+    });
+};
+
+MainAssistant.prototype.connect = function(item){
+	
+	/*
 	var name = this.controller.get("name").value;
 	this.nameCookie.put( name );
 	var host = this.controller.get("host").value;
@@ -48,17 +153,18 @@ MainAssistant.prototype.buttonEvent = function(event){
 	this.networkCookie.put( network );
 	var gateway = this.controller.get("gateway").value;
 	this.gatewayCookie.put( gateway );
+	*/
 	
     this.controller.serviceRequest('luna://cz.karry.vpnc',
 		                               {
 		                                  method: 'connectVpn',	
 		                                  parameters:
 										  {
-											type: "pptp",
-											host: host,
-											name: name,
-											user: user,
-											pass: pass
+											type: item.type,
+											host: item.host,
+											name: item.name,
+											user: item.user,
+											pass: item.pass
 		                                  },
 		                                  onSuccess: this.connectedHandler.bind(this),
 		                                  onFailure: this.connectingFailedHandler.bind(this)
@@ -100,6 +206,6 @@ MainAssistant.prototype.routeSetHandler = function(event){
 MainAssistant.prototype.cleanup = function(event){
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
-	this.setScreenTimeout(2);
+
 }
 

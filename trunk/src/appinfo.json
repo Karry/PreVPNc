@@ -8,7 +8,5 @@
   "icon":"images/icon.png",
   "miniicon":"miniicon.png",
   "type":"web",
-  "theme":"light",
   "noWindow":false,
-  "noDeprecatedStyles":true
 }
