@@ -13,6 +13,7 @@ if [ -d $MOD_DIR ] ; then
     insmod $MOD_DIR/drivers/net/pppoe.ko
     insmod $MOD_DIR/drivers/net/ppp_mppe.ko
 
+    mount -o bind /proc /opt/vpnbox/proc
     exit 0
 else
     echo>&2 "Unsupported kernel version: "`uname -r`

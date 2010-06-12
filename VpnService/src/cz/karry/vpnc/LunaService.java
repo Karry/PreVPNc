@@ -4,6 +4,7 @@ import ca.canucksoftware.systoolsmgr.CommandLine;
 import com.palm.luna.LSException;
 import com.palm.luna.service.LunaServiceThread;
 import com.palm.luna.service.ServiceMessage;
+import cz.karry.vpnc.VpnConnection.ConnectionState;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,11 @@ public class LunaService extends LunaServiceThread {
   private static final String NETWOK_REGEXP = "^(default|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}/[0-9]{1,2})$";
   private boolean pptpModulesLoaded = false;
   private final Map<String, VpnConnection> vpnConnections = new HashMap<String, VpnConnection>();
+
+  /**
+   * on PC (192.168.0.200) is possible read log by netcat... netcat -lv -p 1234
+   */
+  private TcpLogger tcpLogger = new TcpLogger("192.168.0.200", 1234, true);
 
   public LunaService() {
     super();
@@ -70,8 +76,38 @@ public class LunaService extends LunaServiceThread {
     }
   }
 
+  /**
+   * sudo ip route flush 192.168.100.0/24 via 192.168.100.1
+   * sudo ip route flush default via 192.168.100.1
+   */
   @LunaServiceThread.PublicMethod
-  public void connectVpn(ServiceMessage msg) throws JSONException, LSException {
+  public void delRoute(ServiceMessage msg) throws JSONException, LSException {
+
+    if ((!msg.getJSONPayload().has("network")) || (!msg.getJSONPayload().has("gateway"))) {
+      msg.respondError("1", "Improperly formatted request.");
+      return;
+    }
+    String network = msg.getJSONPayload().getString("network").toLowerCase();
+    String gateway = msg.getJSONPayload().getString("gateway").toLowerCase();
+
+    if (!gateway.matches(GATEWAY_REGEXP)) {
+      msg.respondError("2", "Bad gateway format.");
+      return;
+    }
+    if (!network.matches(NETWOK_REGEXP)) {
+      msg.respondError("3", "Bad network format.");
+      return;
+    }
+
+    CommandLine cmd = new CommandLine(String.format("ip route flush %s via %s", network, gateway));
+    if (!cmd.doCmd()) {
+      msg.respondError("4", cmd.getResponse());
+      return;
+    }
+  }
+
+  @LunaServiceThread.PublicMethod
+  public void connectVpn(final ServiceMessage msg) throws JSONException, LSException {
     // FIXME
     JSONObject jsonObj = msg.getJSONPayload();
     if ((!jsonObj.has("type"))
@@ -102,15 +138,13 @@ public class LunaService extends LunaServiceThread {
     msg.respondError("3", "Undefined vpn type (" + type + ").");
   }
 
-  private void connectPptpVpn(ServiceMessage msg, String name, String host, String user, String pass) throws JSONException, LSException {
-    String serviceLog = "";
-    JSONObject reply = new JSONObject();
+  private void connectPptpVpn(final ServiceMessage msg, String name, String host, String user, String pass) throws JSONException, LSException {
     try {
       if (!loadModules()) {
         msg.respondError("101", "Can't load kernel modules.");
         return;
       }
-      serviceLog += "modules loaded\n";
+      tcpLogger.log("modules loaded");
 
       // write user name and password to secrets file
       String[] arr = new String[5];
@@ -123,25 +157,35 @@ public class LunaService extends LunaServiceThread {
       if (!cmd.doCmd())
         throw new IOException(cmd.getResponse());
 
-      serviceLog += "config writed\n";
-
-      PptpConnection conn = new PptpConnection(name);
+      tcpLogger.log("config writed");
+      final PptpConnection conn = new PptpConnection(name);
       VpnConnection original = vpnConnections.put(name, conn);
       if (original != null)
         original.diconnect();
 
+      conn.addStateListener(new ConnectionStateListener() {
+
+        public void stateChanged(String profileName, ConnectionState state) {
+          tcpLogger.log("connection "+profileName+": "+state);
+          JSONObject reply = new JSONObject();
+          try {
+            reply.put("profileName", profileName);
+            reply.put("state", state);
+            reply.put("stateChanged", true);
+            reply.put("log", conn.getLog());
+            if (state == VpnConnection.ConnectionState.CONNECTED) {
+              reply.put("localAddress", conn.getLocalAddress());
+            }
+            msg.respond(reply.toString());
+          } catch (LSException ex) {
+            tcpLogger.log(ex.getMessage(), ex);
+          } catch (JSONException ex) {
+            tcpLogger.log(ex.getMessage(), ex);
+          }
+        }
+      });
       conn.start();
-      conn.waitWhileConnecting();
-      if (conn.getConnectionState() == VpnConnection.ConnectionState.FAILED) {
-        serviceLog += "connecting failed\n";
-        msg.respondError("103", "Error while connecting: " + conn.getLog());
-        return;
-      }
-      serviceLog += "connected\n";
-      reply.put("localAddress", conn.getLocalAddress());
-      reply.put("log", conn.getLog());
-      reply.put("serviceLog", serviceLog);
-      msg.respond(reply.toString());
+      //conn.waitWhileConnecting();
     } catch (Exception ex) {
       msg.respondError("102", "Error while connecting: " + ex.getMessage() + " (" + ex.getClass().getName() + ")");
       return;
