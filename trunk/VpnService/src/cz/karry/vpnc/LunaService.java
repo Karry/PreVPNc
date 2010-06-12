@@ -18,7 +18,6 @@ public class LunaService extends LunaServiceThread {
   private static final String NETWOK_REGEXP = "^(default|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}/[0-9]{1,2})$";
   private boolean pptpModulesLoaded = false;
   private final Map<String, VpnConnection> vpnConnections = new HashMap<String, VpnConnection>();
-
   /**
    * on PC (192.168.0.200) is possible read log by netcat... netcat -lv -p 1234
    */
@@ -107,8 +106,56 @@ public class LunaService extends LunaServiceThread {
   }
 
   @LunaServiceThread.PublicMethod
+  public void connectionInfo(final ServiceMessage msg) throws JSONException, LSException {
+    JSONObject jsonObj = msg.getJSONPayload();
+    if (!jsonObj.has("name")) {
+      msg.respondError("1", "Improperly formatted request.");
+      return;
+    }
+
+    String name = jsonObj.getString("name");
+
+    JSONObject reply = new JSONObject();
+    VpnConnection conn = vpnConnections.get(name);
+    ConnectionState state = VpnConnection.ConnectionState.INACTIVE;
+    String log = "";
+
+    if (conn != null) {
+      state = conn.getConnectionState();
+      log = conn.getLog();
+      if (state == VpnConnection.ConnectionState.CONNECTED) {
+        reply.put("localAddress", conn.getLocalAddress());
+      }
+    }
+
+    try {
+      reply.put("profileName", name);
+      reply.put("state", state);
+      reply.put("log", log);
+      msg.respond(reply.toString());
+    } catch (LSException ex) {
+      tcpLogger.log(ex.getMessage(), ex);
+    } catch (JSONException ex) {
+      tcpLogger.log(ex.getMessage(), ex);
+    }
+  }
+
+  @LunaServiceThread.PublicMethod
+  public void getRegisteredConnections(final ServiceMessage msg) throws JSONException, LSException {
+    JSONObject reply = new JSONObject();
+
+    try {
+      reply.put("connections", vpnConnections.keySet());
+      msg.respond(reply.toString());
+    } catch (LSException ex) {
+      tcpLogger.log(ex.getMessage(), ex);
+    } catch (JSONException ex) {
+      tcpLogger.log(ex.getMessage(), ex);
+    }
+  }
+
+  @LunaServiceThread.PublicMethod
   public void connectVpn(final ServiceMessage msg) throws JSONException, LSException {
-    // FIXME
     JSONObject jsonObj = msg.getJSONPayload();
     if ((!jsonObj.has("type"))
             || (!jsonObj.has("name"))
@@ -166,7 +213,7 @@ public class LunaService extends LunaServiceThread {
       conn.addStateListener(new ConnectionStateListener() {
 
         public void stateChanged(String profileName, ConnectionState state) {
-          tcpLogger.log("connection "+profileName+": "+state);
+          tcpLogger.log("connection " + profileName + ": " + state);
           JSONObject reply = new JSONObject();
           try {
             reply.put("profileName", profileName);
