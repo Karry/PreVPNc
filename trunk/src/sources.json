@@ -6,6 +6,10 @@
         "source": "app/assistants/main-assistant.js"
     },
     {
+        "scenes": "log",
+        "source": "app/assistants/log-assistant.js"
+    },
+    {
         "scenes": "edit",
         "source": "app/assistants/edit-assistant.js"
     }

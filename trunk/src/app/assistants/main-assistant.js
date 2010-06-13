@@ -30,48 +30,28 @@ MainAssistant.prototype.setup = function(){
     this.controller.listen(this.profileList, Mojo.Event.listAdd, this.listAddHandler.bind(this));
     this.controller.listen(this.profileList, Mojo.Event.listTap, this.handleTrackTap.bind(this));
 	
-	this.addProfile({name:"test", state:"???", type:"pptp"});
-	VpnManager.getInstance().loadProfiles( this.addProfile.bind(this) , this.tableErrorHandler.bind(this));
+	//add = this.addProfile.bind(this);
+	//add({name:"test", state:"???", type:"pptp"});
 
-	/*
-    this.nameCookie = new Mojo.Model.Cookie( 'name' );
-    if (this.nameCookie.get() != undefined)
-        this.controller.get("name").value = this.nameCookie.get();
-	
-    this.hostCookie = new Mojo.Model.Cookie( 'host' );
-    if (this.hostCookie.get() != undefined)
-        this.controller.get("host").value = this.hostCookie.get();
-	
-    this.userCookie = new Mojo.Model.Cookie( 'user' );
-    if (this.userCookie.get() != undefined)
-        this.controller.get("user").value = this.userCookie.get();
-	
-    this.passCookie = new Mojo.Model.Cookie( 'pass' );
-    if (this.passCookie.get() != undefined)
-        this.controller.get("pass").value = this.passCookie.get();
-	
-    this.networkCookie = new Mojo.Model.Cookie( 'network' );
-    if (this.networkCookie.get() != undefined)
-        this.controller.get("network").value = this.networkCookie.get();
-	
-    this.gatewayCookie = new Mojo.Model.Cookie( 'gateway' );
-    if (this.gatewayCookie.get() != undefined)
-        this.controller.get("gateway").value = this.gatewayCookie.get();
-	
-	this.log = "";
-    this.controller.listen('btn', Mojo.Event.tap, this.buttonEvent.bind(this));
-	*/
+	VpnManager.getInstance().loadProfiles( this.controller, this.addProfile.bind(this) , this.tableErrorHandler.bind(this));
+	VpnManager.getInstance().addListener(this.update.bind(this));
 }
 
-MainAssistant.prototype.tableErrorHandler = function(transaction, error){
-    $('trackHeadermsg').update('Error: ' + error.message + ' (Code ' + error.code + ')');
-    return true;
-}
 
 MainAssistant.prototype.addProfile = function(item){
+	Mojo.Log.error("add profile to model... "+Object.toJSON(item)); 	
 	this.currentModel.items.push(item);
-    //this.profileList.mojo.noticeAddedItems(this.currentModel.items.length, [item]);	
+	this.controller.modelChanged(this.currentModel);
+    //this.controller.get('profileList').mojo.noticeAddedItems(this.currentModel.items.length, [item]);	
     //this.profileList.mojo.revealItem(350, true);
+}
+
+MainAssistant.prototype.update = function(edited, deleted){
+	if (edited && this.currentModel.items.indexOf(edited) < 0){
+		this.currentModel.items.push(edited);
+		this.controller.modelChanged(this.currentModel);		
+	}
+	this.controller.modelChanged(this.currentModel);
 }
 
 
@@ -89,8 +69,10 @@ MainAssistant.prototype.listDeleteHandler = function(event){
     Mojo.log("EditablelistAssistant deleting '"+event.item.data+"'.");
 	VpnManager.getInstance().deleteProfile( event.item,
 			function(){
-				 if (event.type == "mojo-list-tap") // event from context menu, not from "slide" delete
-					 this.controller.modelChanged(this.currentModel);
+				/*
+				if (event.type == "mojo-list-tap") // event from context menu, not from "slide" delete
+					this.controller.modelChanged(this.currentModel);
+				*/
 			},
 			this.tableErrorHandler.bind(this));
 }
@@ -113,9 +95,20 @@ MainAssistant.prototype.handleTrackTap = function(event){
     this.controller.popupSubmenu({
         onChoose: function(response){
             if (response == 'connect') {
-				this.connect( event.item );
+				VpnManager.getInstance().connect( this.controller, event.item,
+												function(event){
+													$('msg').innerHTML = Object.toJSON(event);
+												});
 			} else if (response == "edit"){
-				Mojo.Controller.stageController.pushScene("edit",{profile: event.item});			
+				Mojo.Controller.stageController.pushScene("edit",{profile: event.item});
+			} else if (response == 'showLog'){
+				VpnManager.getInstance().refreshProfileInfo(this.controller, event.item,
+															function(profile){
+																Mojo.Controller.stageController.pushScene("log",{profile: profile});
+															},
+															function(event){
+																$('msg').innerHTML = Object.toJSON(event);
+															});
             } else if (response == 'delete') {
                 this.controller.showAlertDialog({
                     onChoose: function(value) {
@@ -138,66 +131,15 @@ MainAssistant.prototype.handleTrackTap = function(event){
     });
 };
 
-MainAssistant.prototype.connect = function(item){
-	
-	/*
-	var name = this.controller.get("name").value;
-	this.nameCookie.put( name );
-	var host = this.controller.get("host").value;
-	this.hostCookie.put( host );
-	var user = this.controller.get("user").value;
-	this.userCookie.put( user );
-	var pass = this.controller.get("pass").value;
-	this.passCookie.put( pass );
-	var network = this.controller.get("network").value;
-	this.networkCookie.put( network );
-	var gateway = this.controller.get("gateway").value;
-	this.gatewayCookie.put( gateway );
-	*/
-	
-    this.controller.serviceRequest('luna://cz.karry.vpnc',
-		                               {
-		                                  method: 'connectVpn',	
-		                                  parameters:
-										  {
-											type: item.type,
-											host: item.host,
-											name: item.name,
-											user: item.user,
-											pass: item.pass
-		                                  },
-		                                  onSuccess: this.connectedHandler.bind(this),
-		                                  onFailure: this.connectingFailedHandler.bind(this)
-	                                   }
-									   );
 
-}
-
-MainAssistant.prototype.connectedHandler = function(obj){
-	//this.log = this.log+"   \n"+Object.toJSON(obj);
-    //$('msg').innerHTML = this.log; 
-    $('msg').innerHTML = "connected, result: "+Object.toJSON(obj);
-
-	if (obj.state == "CONNECTED" && obj.stateChanged){
-		var network = this.controller.get("network").value;
-		var gateway = this.controller.get("gateway").value;
-		this.controller.serviceRequest('luna://cz.karry.vpnc',
-										   {
-											  method: 'addRoute',	
-											  parameters:
-											  {
-												network: network,
-												gateway: gateway
-											  },
-											  onSuccess: this.routeSetHandler.bind(this),
-											  onFailure: this.routeSetHandler.bind(this)
-										   }
-										   );
-	}	
+MainAssistant.prototype.tableErrorHandler = function(transaction, error){
+    $('msg').innerHTML = Object.toJSON(event);
+    //$('msg').update('Error: ' + error.message + ' (Code ' + error.code + ')');
+    return true;
 }
 
 MainAssistant.prototype.connectingFailedHandler = function(event){
-    $('msg').innerHTML = "connection failed, result: "+Object.toJSON(event);
+    $('msg').innerHTML = Object.toJSON(event);
 }
 MainAssistant.prototype.routeSetHandler = function(event){
     $('msg2').innerHTML = Object.toJSON(event);

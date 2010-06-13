@@ -14,3 +14,20 @@
 .warning h3{
     margin:0px;
 }
+
+pre{
+    margin:5px ;
+    padding:2px;
+    border:1px solid #888;
+    font-size:small;    
+}
+
+.log-state{
+    margin:4px;
+    font-size:small;
+}
+
+.log-name{
+    margin:4px;
+    font-size:larger;
+}
