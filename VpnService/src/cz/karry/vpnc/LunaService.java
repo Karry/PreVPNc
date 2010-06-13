@@ -241,6 +241,7 @@ public class LunaService extends LunaServiceThread {
               reply.put("localAddress", conn.getLocalAddress());
             }
             msg.respond(reply.toString());
+            tcpLogger.log("     "+reply.toString());
           } catch (LSException ex) {
             tcpLogger.log(ex.getMessage(), ex);
           } catch (JSONException ex) {

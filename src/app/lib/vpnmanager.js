@@ -162,14 +162,14 @@ VpnManager.prototype.connect = function(controller, profile, errorHandler){
 											pass: profile.password
 		                                  },
 		                                  onSuccess: function(msg){
-                                            handler(msg, profile);
+                                            handler(controller, msg, profile);
                                           },
 		                                  onFailure: errorHandler
 	                                   }
 									   );
 }
 
-VpnManager.prototype.connectionStateChanged = function(obj, profile){
+VpnManager.prototype.connectionStateChanged = function(controller, obj, profile){
     
     if (profile.name != obj.profileName){
         Mojo.Log.error("profile names isn't equals " + profile.name+", "+obj.profileName);
@@ -192,7 +192,7 @@ VpnManager.prototype.connectionStateChanged = function(obj, profile){
         for (i = 0; i<profile.routes.length; i++){
             var network = profile.routes[i].network;
             var gateway = profile.routes[i].gateway;
-            this.controller.serviceRequest('luna://cz.karry.vpnc',
+            controller.serviceRequest('luna://cz.karry.vpnc',
                                                {
                                                   method: 'addRoute',	
                                                   parameters:
