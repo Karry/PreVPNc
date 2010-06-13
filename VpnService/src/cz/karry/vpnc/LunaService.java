@@ -27,6 +27,13 @@ public class LunaService extends LunaServiceThread {
     super();
   }
 
+  /**
+   * luna-send -t 1 luna://cz.karry.vpnc/random "{}"
+   * 
+   * @param msg
+   * @throws JSONException
+   * @throws LSException
+   */
   @LunaServiceThread.PublicMethod
   public void random(ServiceMessage msg) throws JSONException, LSException {
     JSONObject reply = new JSONObject();
@@ -67,12 +74,16 @@ public class LunaService extends LunaServiceThread {
       msg.respondError("3", "Bad network format.");
       return;
     }
-
-    CommandLine cmd = new CommandLine(String.format("ip route add %s via %s", network, gateway));
+    
+    String cmdStr = String.format("ip route add %s via %s", network, gateway);
+    CommandLine cmd = new CommandLine(cmdStr);
     if (!cmd.doCmd()) {
       msg.respondError("4", cmd.getResponse());
       return;
     }
+    JSONObject reply = new JSONObject();
+    reply.put("command", cmdStr);
+    msg.respond(reply.toString());
   }
 
   /**
@@ -98,11 +109,15 @@ public class LunaService extends LunaServiceThread {
       return;
     }
 
-    CommandLine cmd = new CommandLine(String.format("ip route flush %s via %s", network, gateway));
+    String cmdStr = String.format("ip route flush %s via %s", network, gateway);
+    CommandLine cmd = new CommandLine(cmdStr);
     if (!cmd.doCmd()) {
       msg.respondError("4", cmd.getResponse());
       return;
     }
+    JSONObject reply = new JSONObject();
+    reply.put("command", cmdStr);
+    msg.respond(reply.toString());
   }
 
   @LunaServiceThread.PublicMethod
@@ -116,6 +131,7 @@ public class LunaService extends LunaServiceThread {
     String name = jsonObj.getString("name");
 
     JSONObject reply = new JSONObject();
+    reply.put("name", name);
     VpnConnection conn = vpnConnections.get(name);
     ConnectionState state = VpnConnection.ConnectionState.INACTIVE;
     String log = "";
@@ -132,6 +148,7 @@ public class LunaService extends LunaServiceThread {
       reply.put("profileName", name);
       reply.put("state", state);
       reply.put("log", log);
+      tcpLogger.log("refresh info: "+reply.toString());
       msg.respond(reply.toString());
     } catch (LSException ex) {
       tcpLogger.log(ex.getMessage(), ex);
@@ -162,7 +179,7 @@ public class LunaService extends LunaServiceThread {
             || (!jsonObj.has("host"))
             || (!jsonObj.has("user"))
             || (!jsonObj.has("pass"))) {
-      msg.respondError("1", "Improperly formatted request.");
+      msg.respondError("1", "Improperly formatted request. ("+jsonObj.toString()+")");
       return;
     }
 
