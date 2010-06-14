@@ -21,7 +21,7 @@ public class LunaService extends LunaServiceThread {
   /**
    * on PC (192.168.0.200) is possible read log by netcat... netcat -lv -p 1234
    */
-  private TcpLogger tcpLogger = new TcpLogger("192.168.0.200", 1234, true);
+  private TcpLogger tcpLogger = new TcpLogger("/media/internal/.vpn/debug.conf");
 
   public LunaService() {
     super();
