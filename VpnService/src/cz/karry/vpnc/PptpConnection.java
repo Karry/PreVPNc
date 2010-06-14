@@ -29,7 +29,7 @@ public class PptpConnection extends VpnConnection {
   public synchronized void start() {
     super.start();
     synchronized (connectionLock) {
-      this.setConnectionState( ConnectionState.CONNECTING );
+      this.setConnectionState(ConnectionState.CONNECTING);
     }
   }
 
@@ -60,20 +60,18 @@ public class PptpConnection extends VpnConnection {
             if (line == null) {
               process.waitFor();
               this.returnCode = process.exitValue();
-              if (returnCode == 0) {
-                synchronized (connectionLock) {
-                  this.setConnectionState( ConnectionState.INACTIVE );
-                }
-              } else {
-                synchronized (connectionLock) {
-                  this.setConnectionState( ConnectionState.FAILED );
+              synchronized (connectionLock) {
+                if (returnCode == 0 || (getConnectionState() == ConnectionState.DISCONNECTING)) {
+                  this.setConnectionState(ConnectionState.INACTIVE);
+                } else {
+                  this.setConnectionState(ConnectionState.FAILED);
                 }
               }
             } else {
               if (line.startsWith("local  IP address")) {
                 this.localAddress = line.substring("local  IP address".length());
                 synchronized (connectionLock) {
-                  this.setConnectionState( ConnectionState.CONNECTED );
+                  this.setConnectionState(ConnectionState.CONNECTED);
                   poolInterval = 300;
                   connectionLock.notifyAll();
                 }
@@ -81,10 +79,11 @@ public class PptpConnection extends VpnConnection {
               this.log += "\n" + line;
             }
           }
-          try{
+          try {
             Thread.sleep(poolInterval);
-          }catch(InterruptedException ie){}
-          
+          } catch (InterruptedException ie) {
+          }
+
         }
         synchronized (connectionLock) {
           connectionLock.notifyAll();
@@ -108,12 +107,12 @@ public class PptpConnection extends VpnConnection {
     synchronized (connectionLock) {
       if (getConnectionState() == ConnectionState.CONNECTING
               || getConnectionState() == ConnectionState.CONNECTED) {
+        
+        setConnectionState(ConnectionState.DISCONNECTING);
         if (this.process != null)
           this.process.destroy();
       }
     }
   }
-
-
 }
 
