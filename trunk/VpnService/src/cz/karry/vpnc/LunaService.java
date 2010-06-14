@@ -7,6 +7,7 @@ import com.palm.luna.service.ServiceMessage;
 import cz.karry.vpnc.VpnConnection.ConnectionState;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -158,6 +159,22 @@ public class LunaService extends LunaServiceThread {
   }
 
   @LunaServiceThread.PublicMethod
+  public void listenOnChanges(final ServiceMessage msg) throws JSONException, LSException {
+    JSONObject jsonObj = msg.getJSONPayload();
+    if (!jsonObj.has("name")) {
+      msg.respondError("1", "Improperly formatted request.");
+      return;
+    }
+    String name = jsonObj.getString("name");
+
+    VpnConnection conn = vpnConnections.get(name);
+    if (conn != null){
+      tcpLogger.log("add listener for "+name);
+      conn.addStateListener(new ConnectionStateListenerImpl(msg, conn));
+    }
+  }
+
+  @LunaServiceThread.PublicMethod
   public void getRegisteredConnections(final ServiceMessage msg) throws JSONException, LSException {
     JSONObject reply = new JSONObject();
 
@@ -259,19 +276,21 @@ public class LunaService extends LunaServiceThread {
   class ConnectionStateListenerImpl implements ConnectionStateListener{
     private final ServiceMessage msg;
     private final VpnConnection conn;
+    private int id;
 
     public ConnectionStateListenerImpl(ServiceMessage msg, VpnConnection conn) {
       this.msg = msg;
       this.conn = conn;
     }
 
-    public void stateChanged(String profileName, ConnectionState state) {
+    public void stateChanged(String profileName, ConnectionState state, int listenerId) {
       tcpLogger.log("connection " + profileName + ": " + state);
       JSONObject reply = new JSONObject();
       try {
         reply.put("profileName", profileName);
         reply.put("state", state);
         reply.put("stateChanged", true);
+        reply.put("listenerId",listenerId);
         reply.put("log", conn.getLog());
         if (state == VpnConnection.ConnectionState.CONNECTED) {
           reply.put("localAddress", conn.getLocalAddress());
@@ -285,24 +304,12 @@ public class LunaService extends LunaServiceThread {
       }
     }
 
+    public int getId() {
+      return this.id;
+    }
+
+    public void setId(int newId) {
+      this.id = newId;
+    }
   }
-  /*
-  private String[] readLines(File f) throws IOException {
-  InputStreamReader in = null;
-  try {
-  in = new InputStreamReader(new BufferedInputStream(new FileInputStream(f)));
-  int nch;
-  char[] buff = new char[4096];
-  String content = "";
-  while ((nch = in.read(buff, 0, buff.length)) != -1) {
-  content += new String(buff, 0, nch);
-  }
-  return content.split("\n");
-  } finally {
-  if (in != null)
-  in.close();
-  }
-  }
-   * 
-   */
 }
