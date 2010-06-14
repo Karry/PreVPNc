@@ -1,10 +1,11 @@
 package cz.karry.vpnc;
 
-import java.io.IOException;
+import java.io.FileInputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.Socket;
+import java.util.Properties;
 
 /**
  *
@@ -14,16 +15,25 @@ public class TcpLogger {
 
   private PrintWriter writer = null;
 
-  public TcpLogger(String host, int port, boolean send) {
-    if (send) {
-      try {
-        Socket socket = null;
-        socket = new Socket(Inet4Address.getByName(host), port);
+  TcpLogger(String configFile) {
+    Properties prop = new Properties();
+    Socket socket;
+    try {
+      prop.load(new FileInputStream(configFile));
+      if (prop.getProperty("debug") != null &&
+              prop.getProperty("port") != null &&
+              prop.getProperty("address") != null &&
+              prop.getProperty("debug").toLowerCase().equals("true")){
+        int port = Integer.parseInt(prop.getProperty("port"));
+        String address = prop.getProperty("address");
+        socket = new Socket(Inet4Address.getByName(address), port);
         writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
         this.log("logger started...");
-      } catch (IOException ex) {
-        // do nothing
       }
+    } catch (Exception ex) {
+      System.out.println("exception when reading debug config "+ex.getMessage());
+      ex.printStackTrace();
+      // what we can do? I don't know how to debug WebOS Java services
     }
   }
 
