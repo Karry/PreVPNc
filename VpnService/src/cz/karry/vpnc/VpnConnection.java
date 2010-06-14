@@ -13,7 +13,9 @@ abstract class VpnConnection extends Thread {
   protected final String profileName;
   protected String log = "";
   protected String localAddress;
-  protected List<ConnectionStateListener> stateListeners = new LinkedList<ConnectionStateListener>();
+  protected final List<ConnectionStateListener> stateListeners = new LinkedList<ConnectionStateListener>();
+  protected final static Object listenerCounterLock = new Object();
+  protected static volatile int listenerCounter = 0;
 
   public enum ConnectionState {
     CONNECTING,
@@ -51,7 +53,7 @@ abstract class VpnConnection extends Thread {
   public void setConnectionState(ConnectionState state) {
     if (state != this.connectionState){
       for (ConnectionStateListener listener : stateListeners){
-        listener.stateChanged(profileName,state);
+        listener.stateChanged(profileName,state,listener.getId());
       }
     }
     this.connectionState = state;
@@ -65,6 +67,11 @@ abstract class VpnConnection extends Thread {
   abstract public void diconnect();
 
   public boolean addStateListener(ConnectionStateListener l) {
+    int id = 0;
+    synchronized( listenerCounterLock ){
+      id = VpnConnection.listenerCounter++;
+    }
+    l.setId(id);
     return stateListeners.add(l);
   }
 

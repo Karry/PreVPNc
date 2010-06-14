@@ -89,6 +89,8 @@ VpnManager.prototype.loadProfiles = function( controller, upatedProfileHandler ,
     Mojo.Log.error("load profiles... ");
     loadRoutes = this.loadRoutes.bind(this);
     refreshProfileInfo = this.refreshProfileInfo.bind(this);
+    listenOnChanges = this.listenOnChanges.bind(this);
+    handler = this.connectionStateChanged.bind(this);
     this.executeSQL("SELECT *, 'UNDEFINED' AS `state` FROM `vpn_profile`",
                     function(transaction, result){
                         if (result.rows){
@@ -98,6 +100,12 @@ VpnManager.prototype.loadProfiles = function( controller, upatedProfileHandler ,
                                 loadRoutes(controller, item,
                                         function( profile ){
                                             refreshProfileInfo(controller, profile, upatedProfileHandler, tableErrorHandler);
+                                            listenOnChanges(controller, profile,
+                                                            function(msg){
+                                                                handler(controller, msg, profile);
+                                                            },
+                                                            function(){}
+                                                            );
                                         }
                                         , tableErrorHandler);
                             }
@@ -106,6 +114,20 @@ VpnManager.prototype.loadProfiles = function( controller, upatedProfileHandler ,
                         }                        
                     },
                     tableErrorHandler);
+}
+
+VpnManager.prototype.listenOnChanges = function(controller, profile, changeHandler, errorHandler){
+    controller.serviceRequest('luna://cz.karry.vpnc',
+		                               {
+		                                  method: 'listenOnChanges',	
+		                                  parameters:
+										  {
+											name: profile.name
+		                                  },
+		                                  onSuccess: changeHandler,
+		                                  onFailure: errorHandler
+	                                   }
+									   );    
 }
 
 VpnManager.prototype.loadRoutes = function(controller, profile, upatedProfileHandler, errorHandler){
@@ -193,7 +215,6 @@ VpnManager.prototype.connectionStateChanged = function(controller, obj, profile)
         return;
     }
     
-    //$('msg').innerHTML = "connected, result: "+Object.toJSON(obj);
     profile.state = obj.state;
     profile.log = obj.log;
     profile.localAddress = obj.localAddress;
@@ -218,7 +239,7 @@ VpnManager.prototype.connectionStateChanged = function(controller, obj, profile)
                                                     gateway: gateway
                                                   },
                                                   onSuccess: function(){
-                                                    Mojo.Log.error("error set route... " + e);   
+                                                    Mojo.Log.error("set route done... " + e);   
                                                     },
                                                   onFailure: function(e){
                                                     Mojo.Log.error("error set route... " + e);   
