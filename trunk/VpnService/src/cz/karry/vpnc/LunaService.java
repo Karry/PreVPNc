@@ -172,6 +172,26 @@ public class LunaService extends LunaServiceThread {
   }
 
   @LunaServiceThread.PublicMethod
+  public void disconnectVpn(final ServiceMessage msg) throws JSONException, LSException {
+    JSONObject jsonObj = msg.getJSONPayload();
+    if (!jsonObj.has("name")) {
+      msg.respondError("1", "Improperly formatted request. ("+jsonObj.toString()+")");
+      return;
+    }
+
+    String name = jsonObj.getString("name");
+    VpnConnection conn = vpnConnections.get(name);
+    if (conn == null){
+      msg.respondError("2", "Connection '"+name+"' is not registered.");
+      return;
+    }
+
+    conn.addStateListener(new ConnectionStateListenerImpl(msg, conn));
+    conn.diconnect();
+    //msg.respondTrue();
+  }
+
+  @LunaServiceThread.PublicMethod
   public void connectVpn(final ServiceMessage msg) throws JSONException, LSException {
     JSONObject jsonObj = msg.getJSONPayload();
     if ((!jsonObj.has("type"))
@@ -202,7 +222,7 @@ public class LunaService extends LunaServiceThread {
     msg.respondError("3", "Undefined vpn type (" + type + ").");
   }
 
-  private void connectPptpVpn(final ServiceMessage msg, String name, String host, String user, String pass) throws JSONException, LSException {
+  private void connectPptpVpn(ServiceMessage msg, String name, String host, String user, String pass) throws JSONException, LSException {
     try {
       if (!loadModules()) {
         msg.respondError("101", "Can't load kernel modules.");
@@ -222,33 +242,12 @@ public class LunaService extends LunaServiceThread {
         throw new IOException(cmd.getResponse());
 
       tcpLogger.log("config writed");
-      final PptpConnection conn = new PptpConnection(name);
+      PptpConnection conn = new PptpConnection(name);
       VpnConnection original = vpnConnections.put(name, conn);
       if (original != null)
         original.diconnect();
 
-      conn.addStateListener(new ConnectionStateListener() {
-
-        public void stateChanged(String profileName, ConnectionState state) {
-          tcpLogger.log("connection " + profileName + ": " + state);
-          JSONObject reply = new JSONObject();
-          try {
-            reply.put("profileName", profileName);
-            reply.put("state", state);
-            reply.put("stateChanged", true);
-            reply.put("log", conn.getLog());
-            if (state == VpnConnection.ConnectionState.CONNECTED) {
-              reply.put("localAddress", conn.getLocalAddress());
-            }
-            msg.respond(reply.toString());
-            tcpLogger.log("     "+reply.toString());
-          } catch (LSException ex) {
-            tcpLogger.log(ex.getMessage(), ex);
-          } catch (JSONException ex) {
-            tcpLogger.log(ex.getMessage(), ex);
-          }
-        }
-      });
+      conn.addStateListener(new ConnectionStateListenerImpl(msg, conn));
       conn.start();
       //conn.waitWhileConnecting();
     } catch (Exception ex) {
@@ -257,6 +256,36 @@ public class LunaService extends LunaServiceThread {
     }
   }
 
+  class ConnectionStateListenerImpl implements ConnectionStateListener{
+    private final ServiceMessage msg;
+    private final VpnConnection conn;
+
+    public ConnectionStateListenerImpl(ServiceMessage msg, VpnConnection conn) {
+      this.msg = msg;
+      this.conn = conn;
+    }
+
+    public void stateChanged(String profileName, ConnectionState state) {
+      tcpLogger.log("connection " + profileName + ": " + state);
+      JSONObject reply = new JSONObject();
+      try {
+        reply.put("profileName", profileName);
+        reply.put("state", state);
+        reply.put("stateChanged", true);
+        reply.put("log", conn.getLog());
+        if (state == VpnConnection.ConnectionState.CONNECTED) {
+          reply.put("localAddress", conn.getLocalAddress());
+        }
+        msg.respond(reply.toString());
+        tcpLogger.log("     "+reply.toString());
+      } catch (LSException ex) {
+        tcpLogger.log(ex.getMessage(), ex);
+      } catch (JSONException ex) {
+        tcpLogger.log(ex.getMessage(), ex);
+      }
+    }
+
+  }
   /*
   private String[] readLines(File f) throws IOException {
   InputStreamReader in = null;

@@ -16,9 +16,9 @@ abstract class VpnConnection extends Thread {
   protected List<ConnectionStateListener> stateListeners = new LinkedList<ConnectionStateListener>();
 
   public enum ConnectionState {
-
     CONNECTING,
     CONNECTED,
+    DISCONNECTING,
     FAILED,
     INACTIVE
   }

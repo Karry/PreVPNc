@@ -99,6 +99,11 @@ MainAssistant.prototype.handleTrackTap = function(event){
 												function(event){
 													$('msg').innerHTML = Object.toJSON(event);
 												});
+			} else if (response == "disconnect"){
+				VpnManager.getInstance().disconnect( this.controller, event.item,
+												function(event){
+													$('msg').innerHTML = Object.toJSON(event);
+												});				
 			} else if (response == "edit"){
 				Mojo.Controller.stageController.pushScene("edit",{profile: event.item});
 			} else if (response == 'showLog'){

@@ -147,6 +147,23 @@ VpnManager.prototype.refreshProfileInfo = function(controller, profile, upatedPr
 									   );    
 }
 
+VpnManager.prototype.disconnect = function(controller, profile, errorHandler){
+
+    handler = this.connectionStateChanged.bind(this);
+    controller.serviceRequest('luna://cz.karry.vpnc',
+		                               {
+		                                  method: 'disconnectVpn',	
+		                                  parameters:
+										  {
+											name: profile.name
+		                                  },
+		                                  onSuccess: function(msg){
+                                            handler(controller, msg, profile);
+                                          },
+		                                  onFailure: errorHandler
+	                                   }
+									   );
+}
 VpnManager.prototype.connect = function(controller, profile, errorHandler){
 
     handler = this.connectionStateChanged.bind(this);
