@@ -1,5 +1,10 @@
 #summary Howto setup VPN connection.
 
-= Introduction =
+= Diagram =
 
-TODO: add some howto here :)
+<a href="http://prevpnc.googlecode.com/svn/wiki/images/howto_setup.png" ><img src="http://prevpnc.googlecode.com/svn/wiki/images/howto_setup.png"   width="800" alt="VPN diagram"       /></a>
+
+
+= Setup PPTP VPN server on Windows =
+
+FIXME
