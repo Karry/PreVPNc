@@ -2,7 +2,7 @@
 
 = Diagram =
 
-<a href="http://prevpnc.googlecode.com/svn/wiki/images/howto_setup.png" ><img src="http://prevpnc.googlecode.com/svn/wiki/images/howto_setup.png"   width="800" alt="VPN diagram"       /></a>
+<a href="http://prevpnc.googlecode.com/svn/wiki/images/howto_setup.svg" ><img src="http://prevpnc.googlecode.com/svn/wiki/images/howto_setup.png"   width="800" alt="VPN diagram"       /></a>
 
 
 = Setup PPTP VPN server on Windows =
