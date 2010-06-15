@@ -16,7 +16,7 @@
    version="1.1"
    inkscape:version="0.47 r22583"
    sodipodi:docname="Virtual_Private_Network_overview.svg"
-   inkscape:export-filename="/media/data/tmp/Virtual_Private_Network_overview.png"
+   inkscape:export-filename="howto_setup.png"
    inkscape:export-xdpi="185.62"
    inkscape:export-ydpi="185.62">
   <defs
@@ -1173,7 +1173,7 @@
        id="image3585"
        height="786.45941"
        width="631.33923"
-       xlink:href="file:///media/data/tmp/prevpnc.png" />
+       xlink:href="prevpnc.png" />
   </g>
   <g
      inkscape:groupmode="layer"
