@@ -31,3 +31,7 @@ pre{
     margin:4px;
     font-size:larger;
 }
+
+.hidden{
+    display:none;
+}
