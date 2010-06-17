@@ -7,52 +7,95 @@
 		</div>
 	</div>
 
-    <div class="palm-list">
+	<div class="palm-group">
+		<div class="palm-group-title">
+			Basic
+		</div>
+		<div class="palm-list">
+	
+			<div class="palm-row first" x-mojo-tap-highlight="momentary">
+				<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
+					<div class="title">
+						<div class="label">
+							Session name
+						</div>
+						<div id="name" name="name" x-mojo-element="TextField">preVPNc</div>
+					</div>
+				</div>
+			</div>
 
-        <div class="palm-row first" x-mojo-tap-highlight="momentary">
-            <div class="palm-row-wrapper">
-                VPN type: <strong>PPTP</strong>
-            </div>
-        </div>
+			<div class="palm-row " x-mojo-tap-highlight="momentary">
+				<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+					<div x-mojo-element="ListSelector" id="type" name="type" class=""></div>
+				</div>
+			</div>
+	
+			<div class="palm-row " x-mojo-tap-highlight="momentary">
+				<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
+					<div class="title">
+						<div class="label">
+							Host
+						</div>
+						<div id="host" name="host" x-mojo-element="TextField"></div>
+					</div>
+				</div>
+			</div>
+			<div class="palm-row " x-mojo-tap-highlight="momentary">
+				<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
+					<div class="title">
+						<div class="label">
+							User
+						</div>
+						<div id="user" name="user" x-mojo-element="TextField"></div>
+					</div>
+				</div>
+			</div>
+			<div class="palm-row last" x-mojo-tap-highlight="momentary">
+				<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
+					<div class="title">
+						<div class="label">
+							Password
+						</div>
+						<div id="password" name="password" x-mojo-element="TextField"></div>						
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div class="palm-group">
+		<div class="palm-group-title">
+			Routing
+		</div>
+		<div class="palm-list">
+			<div class="palm-row first" x-mojo-tap-highlight="momentary">
+				<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
+					<div class="title">
+						<div class="label">
+							Network
+						</div>
+						<div id="network" name="network" x-mojo-element="TextField">192.168.0.0/24</div>
+					</div>
+				</div>
+			</div>
+			<div class="palm-row last" x-mojo-tap-highlight="momentary">
+				<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
+					<div class="title">
+						<div class="label">
+							Gateway
+						</div>
+						<div id="gateway" name="gateway" x-mojo-element="TextField">192.168.0.1</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 
-        <div class="palm-row" x-mojo-tap-highlight="momentary">
-            <div class="palm-row-wrapper">
-                Session name: <input type="text" id="name" value="preVPNc" />
-            </div>
-        </div>
-        <div class="palm-row first" x-mojo-tap-highlight="momentary">
-            <div class="palm-row-wrapper">
-                Host: <input type="text" id="host" value="" />
-            </div>
-        </div>
-        <div class="palm-row first" x-mojo-tap-highlight="momentary">
-            <div class="palm-row-wrapper">
-                User: <input type="text" id="user" value="" />
-            </div>
-        </div>
-        <div class="palm-row first" x-mojo-tap-highlight="momentary">
-            <div class="palm-row-wrapper">
-                Password: <input type="text" id="pass" value="" />
-            </div>
-        </div>
-        <div class="palm-row first" x-mojo-tap-highlight="momentary">
-            <div class="palm-row-wrapper">
-                Network: <input type="text" id="network" value="192.168.0.0/24" />
-            </div>
-        </div>
-        <div class="palm-row first" x-mojo-tap-highlight="momentary">
-            <div class="palm-row-wrapper">
-                Gateway: <input type="text" id="gateway" value="192.168.0.1" />
-            </div>
-        </div>
+	<div style="text-align:center;">
+		<button id="btn" style="margin:6px">SAVE</button>
+	</div>
 
-        <div class="palm-row last" x-mojo-tap-highlight="momentary">
-            <div class="palm-row-wrapper">
-                <button id="btn">Save</button>
-            </div>
-        </div>
-
-    </div>
 
     <div id="msg"></div>
     <div id="msg2"></div>
