@@ -231,7 +231,7 @@ public class LunaService extends LunaServiceThread {
       return;
     }
 
-    if (type.equals("pptp")) {
+    if (type.toLowerCase().equals("pptp")) {
       connectPptpVpn(msg, name, host, user, pass);
       return;
     }

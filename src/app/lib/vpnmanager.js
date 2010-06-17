@@ -91,7 +91,7 @@ VpnManager.prototype.loadProfiles = function( controller, upatedProfileHandler ,
     refreshProfileInfo = this.refreshProfileInfo.bind(this);
     listenOnChanges = this.listenOnChanges.bind(this);
     handler = this.connectionStateChanged.bind(this);
-    this.executeSQL("SELECT *, 'UNDEFINED' AS `state` FROM `vpn_profile`",
+    this.executeSQL("SELECT *, 'UNDEFINED' AS `state` FROM `vpn_profile` ORDER BY `name`;",
                     function(transaction, result){
                         if (result.rows){
                             Mojo.Log.error("loaded profiles: "+result.rows.length); 
@@ -250,11 +250,13 @@ VpnManager.prototype.connectionStateChanged = function(controller, obj, profile)
 	}	
 }
 
-VpnManager.prototype.editProfile = function(profile, successHandler, errorHandler){
+VpnManager.prototype.editProfile = function(originalName, profile, successHandler, errorHandler){
     var sqlArr =  [];
     index = 0;
-    sqlArr[index++] = "DELETE FROM `vpn_route` WHERE `profile_name` = '"+profile.name+"'; ";
-    sqlArr[index++] = "DELETE FROM `vpn_profile` WHERE `name` = '"+profile.name+"'; ";
+    if (originalName){
+        sqlArr[index++] = "DELETE FROM `vpn_route` WHERE `profile_name` = '"+originalName+"'; ";
+        sqlArr[index++] = "DELETE FROM `vpn_profile` WHERE `name` = '"+originalName+"'; ";
+    }
     sqlArr[index++] =  "INSERT INTO `vpn_profile` (`name`,`type`,`host`,`user`,`password`) "
                 + "VALUES ('"+profile.name+"','"+profile.type+"','"+profile.host+"','"+profile.user+"','"+profile.password+"');";
                 

@@ -1,43 +1,103 @@
 
 function EditAssistant(params){
-    if (params.profile)
+    if (params.profile){
         this.profile = params.profile;
+        this.originalName = this.profile.name;
+    }
 }
 
 EditAssistant.prototype.setup = function(){
     
     this.controller.listen('btn', Mojo.Event.tap, this.buttonEvent.bind(this));
     
-    if (this.profile){
-
-        this.controller.get("name").value = this.profile.name;
-        this.controller.get("host").value = this.profile.host;
-        this.controller.get("user").value = this.profile.user;
-        this.controller.get("pass").value = this.profile.password;
-        
-        if (this.profile.routes && this.profile.routes.length > 0){
-            this.controller.get("network").value = this.profile.routes[0].network;
-            this.controller.get("gateway").value = this.profile.routes[0].gateway;
-        }
-    }
+    if (!this.profile)
+        this.profile = {};
+    if (!this.profile.routes)
+        this.profile.routes = [];
+    if (!this.profile.routes[0])
+        this.profile.routes[0] = {};
+    
+    this.controller.setupWidget(
+        "name",
+        this.urlAttributes = {
+            modelProperty: "name",
+            limitResize: true,
+            textReplacement: false,
+            enterSubmits: false
+        },
+		this.profile
+    );    
+    this.controller.setupWidget(
+        "host",
+        this.urlAttributes = {
+            modelProperty: "host",
+            limitResize: true,
+            textReplacement: false,
+            enterSubmits: false
+        },
+		this.profile
+    );    
+    this.controller.setupWidget(
+        "user",
+        this.urlAttributes = {
+            modelProperty: "user",
+            limitResize: true,
+            textReplacement: false,
+            enterSubmits: false
+        },
+		this.profile
+    );    
+    this.controller.setupWidget(
+        "password",
+        this.urlAttributes = {
+            modelProperty: "password",
+            limitResize: true,
+            textReplacement: false,
+            enterSubmits: false
+        },
+		this.profile
+    );    
+    this.controller.setupWidget(
+        "network",
+        this.urlAttributes = {
+            modelProperty: "network",
+            limitResize: true,
+            textReplacement: false,
+            enterSubmits: false
+        },
+		this.profile.routes[0]
+    );    
+    this.controller.setupWidget(
+        "gateway",
+        this.urlAttributes = {
+            modelProperty: "gateway",
+            limitResize: true,
+            textReplacement: false,
+            enterSubmits: false
+        },
+		this.profile.routes[0]
+    );
+    
+    
+    this.controller.setupWidget(
+        "type",
+        this.attributes = {
+            modelProperty: 'type',
+            label: $L('VPN Type'),            
+            choices: [
+                {label: "PPTP", value: "PPTP"},
+                {label: "OpenVPN", value: "OpenVPN"}
+            ]},
+        this.profile
+    );
+    
 }
 
 EditAssistant.prototype.buttonEvent = function(event){
     if (!this.profile)
         this.profile = {};
     
-    this.profile.name = this.controller.get("name").value;
-	this.profile.host = this.controller.get("host").value;
-	this.profile.user = this.controller.get("user").value;
-	this.profile.password = this.controller.get("pass").value;
-    
-    this.profile.routes = [];
-    this.profile.routes[0] = {};
-	this.profile.routes[0].network = this.controller.get("network").value;
-	this.profile.routes[0].gateway = this.controller.get("gateway").value;   
-    
-    this.profile.type = "pptp";
-    VpnManager.getInstance().editProfile(this.profile, function(){
+    VpnManager.getInstance().editProfile(this.originalName, this.profile, function(){
             Mojo.Log.error("pop Scene...");        
             Mojo.Controller.stageController.popScene();
         },
