@@ -123,6 +123,7 @@ EditAssistant.prototype.setup = function(){
             modelProperty: 'openvpn_cipher',
             label: $L('Cipher'),  
             choices: [
+                {label: "none", value: "none"},
                 {label: "DES-CFB", value: "DES-CFB"},
                 {label: "DES-CBC", value: "DES-CBC"},
                 {label: "RC2-CBC", value: "RC2-CBC"},

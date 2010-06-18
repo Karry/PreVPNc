@@ -1,9 +1,16 @@
-# %NAME%
-# %USER%
-# %HOST%
-# %TOPOLOGY%
-# %PROTOCOL%
-# %CIPHER%
-# %PASS%
+# name      %NAME%
+# user      %USER%
+# host      %HOST%
+# topology  %TOPOLOGY%
+# protocol  %PROTOCOL%
+# cipher    %CIPHER%
+# pass      %PASS%
 
 
+proto %PROTOCOL%
+dev tun   #default
+client
+remote %HOST% 1194
+secret /media/internal/.vpn/openvpn.key
+mode %TOPOLOGY%
+cipher %CIPHER%
