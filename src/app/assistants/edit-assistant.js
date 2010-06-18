@@ -94,9 +94,9 @@ EditAssistant.prototype.setup = function(){
     
     // OpenVPN specific values
     this.controller.setupWidget(
-        "openvpn-topology",
+        "openvpn_topology",
         this.attributes = {
-            modelProperty: 'openvpn-topology',
+            modelProperty: 'openvpn_topology',
             label: $L('Topology'),              
             choices: [
                 {label: "subnet", value: "subnet"},
@@ -107,9 +107,9 @@ EditAssistant.prototype.setup = function(){
 
     );
     this.controller.setupWidget(
-        "openvpn-protocol",
+        "openvpn_protocol",
         this.attributes = {
-            modelProperty: 'openvpn-protocol',
+            modelProperty: 'openvpn_protocol',
             label: $L('Protocol'),  
             choices: [
                 {label: "TCP", value: "tcp"},
@@ -118,9 +118,9 @@ EditAssistant.prototype.setup = function(){
         this.profile
    );
     this.controller.setupWidget(
-        "openvpn-cipher",
+        "openvpn_cipher",
         this.attributes = {
-            modelProperty: 'openvpn-cipher',
+            modelProperty: 'openvpn_cipher',
             label: $L('Cipher'),  
             choices: [
                 {label: "DES-CFB", value: "DES-CFB"},
