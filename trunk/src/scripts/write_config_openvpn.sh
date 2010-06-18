@@ -12,5 +12,5 @@ protocol=$6
 cipher=$7
 
 
-cat $ROOT/scripts/pptp_template | sed "s/%NAME%/$name/" | sed "s/%USER%/$user/" | sed "s/%HOST%/$host/" | sed "s/%TOPOLOGY%/$topology/" | sed "s/%PROTOCOL%/$protocol/" | sed "s/%CIPHER%/$cipher/" | sed "s/%PASS%/$pass/" > $VPNROOT/tmp/$name.vpn
+cat $ROOT/scripts/openvpn_template | sed "s/%NAME%/$name/" | sed "s/%USER%/$user/" | sed "s/%HOST%/$host/" | sed "s/%TOPOLOGY%/$topology/" | sed "s/%PROTOCOL%/$protocol/" | sed "s/%CIPHER%/$cipher/" | sed "s/%PASS%/$pass/" > $VPNROOT/tmp/$name.vpn
 
