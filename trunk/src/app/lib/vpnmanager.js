@@ -152,10 +152,10 @@ VpnManager.prototype.loadProfiles = function( controller, upatedProfileHandler ,
                                 item = Object.clone(result.rows.item(i));
                                 
                                 if (item.type == "OpenVPN"){
-                                    Mojo.Log.error("select '"+item.name+"' specific config...");
+                                    //Mojo.Log.error("select '"+item.name+"' specific config...");
                                     openVPNConfigLoader(vpnManagerObj, controller, item, loadRoutes, routesHandler, tableErrorHandler);
                                 }else{
-                                    Mojo.Log.error("select routes for '"+item.name+"' ("+item.type+")..."); 
+                                    //Mojo.Log.error("select routes for '"+item.name+"' ("+item.type+")..."); 
                                     loadRoutes(controller, item, routesHandler, tableErrorHandler);
                                 }
                                 

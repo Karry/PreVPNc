@@ -234,9 +234,55 @@ public class LunaService extends LunaServiceThread {
     if (type.toLowerCase().equals("pptp")) {
       connectPptpVpn(msg, name, host, user, pass);
       return;
+    }else if (type.toLowerCase().equals("openvpn")){
+      String topology = jsonObj.getString("openvpn_topology");
+      String protocol = jsonObj.getString("openvpn_protocol");
+      String cipher   = jsonObj.getString("openvpn_cipher");
+      this.connectOpenVPN(msg, name, host, user, pass, topology, protocol, cipher);
     }
 
     msg.respondError("3", "Undefined vpn type (" + type + ").");
+  }
+
+  private void connectOpenVPN(ServiceMessage msg,
+          String name,
+          String host,
+          String user,
+          String pass,
+          String topology,
+          String protocol,
+          String cipher
+          ) throws JSONException, LSException {
+    //String.format("chroot /opt/vpnbox/ /usr/sbin/openvpn /tmp/%s.vpn", profileName);
+    try{
+      String[] arr = new String[8];
+      arr[0] = String.format("%s/scripts/write_config_openvpn.sh", APP_ROOT);
+      arr[1] = String.format("%s", name);
+      arr[2] = String.format("%s", host);
+      arr[3] = String.format("%s", user);
+      arr[4] = String.format("%s", pass);
+      arr[5] = String.format("%s", topology);
+      arr[6] = String.format("%s", protocol);
+      arr[7] = String.format("%s", cipher);
+      
+      CommandLine cmd = new CommandLine(arr);
+      if (!cmd.doCmd())
+        throw new IOException(cmd.getResponse());
+
+      tcpLogger.log("config writed");
+      PptpConnection conn = new PptpConnection(name);
+      VpnConnection original = vpnConnections.put(name, conn);
+      if (original != null)
+        original.diconnect();
+
+      conn.addStateListener(new ConnectionStateListenerImpl(msg, conn));
+      conn.start();
+      //conn.waitWhileConnecting();
+    } catch (Exception ex) {
+      msg.respondError("102", "Error while connecting: " + ex.getMessage() + " (" + ex.getClass().getName() + ")");
+      return;
+    }
+
   }
 
   private void connectPptpVpn(ServiceMessage msg, String name, String host, String user, String pass) throws JSONException, LSException {
@@ -247,9 +293,9 @@ public class LunaService extends LunaServiceThread {
       }
       tcpLogger.log("modules loaded");
 
-      // write user name and password to secrets file
+      // write config to peer file, user name and password to secrets file
       String[] arr = new String[5];
-      arr[0] = String.format("%s/scripts/write_config.sh", APP_ROOT);
+      arr[0] = String.format("%s/scripts/write_config_pptp.sh", APP_ROOT);
       arr[1] = String.format("%s", name);
       arr[2] = String.format("%s", host);
       arr[3] = String.format("%s", user);
