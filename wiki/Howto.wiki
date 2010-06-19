@@ -11,7 +11,9 @@ FIXME
 
 = Connect to OpenVPN server =
 
-OpenVPN is very flexible VPN solution. It is hard create simple ui that allow configure all options at the same time. If you need more specific configuration for connect to your VPN server, you can write owns config template... Before connecting is called simple script that allow customize config file:
+You should put your shared key to internal storage to *.vpn/openvpn_%NAME%.key* file, where %NAME% is alias for Session name in PreVPNc...
+
+OpenVPN is very flexible VPN solution. It is hard create simple ui that allow configure all options at the same time. If you need more specific configuration for connect to your VPN server, you can write owns config template... (/media/internal/.vpn/openvpn_template) Before connecting is called simple script that allow customize config file:
 
 *Default OpenVPN config template*
 {{{
