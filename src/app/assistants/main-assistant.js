@@ -81,7 +81,7 @@ MainAssistant.prototype.handleTrackTap = function(event){
 
 	var profilePopupModel = [];
 	var i = 0;
-	if (event.item.state == "CONNECTED"){
+	if (event.item.state == "CONNECTED" || event.item.state == "CONNECTING" ){
 		profilePopupModel[i++] = {label: $L('Disconnect'), command: 'disconnect'};
 	}else{
 		profilePopupModel[i++] = {label: $L('Connect'), command: 'connect'};

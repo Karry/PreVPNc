@@ -244,7 +244,14 @@ VpnManager.prototype.connect = function(controller, profile, errorHandler){
     controller.serviceRequest('luna://cz.karry.vpnc',
 		                               {
 		                                  method: 'connectVpn',	
-		                                  parameters:
+		                                  parameters: profile,
+		                                  onSuccess: function(msg){
+                                            handler(controller, msg, profile);
+                                          },
+		                                  onFailure: errorHandler
+	                                   }
+									   );
+    /*
 										  {
 											type: profile.type,
 											host: profile.host,
@@ -252,12 +259,8 @@ VpnManager.prototype.connect = function(controller, profile, errorHandler){
 											user: profile.user,
 											pass: profile.password
 		                                  },
-		                                  onSuccess: function(msg){
-                                            handler(controller, msg, profile);
-                                          },
-		                                  onFailure: errorHandler
-	                                   }
-									   );
+     
+    */
 }
 
 VpnManager.prototype.connectionStateChanged = function(controller, obj, profile){
