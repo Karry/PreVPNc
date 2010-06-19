@@ -11,7 +11,7 @@ FIXME
 
 = Connect to OpenVPN server =
 
-OpenVPN is very flexible VPN solution. It is hard create simple ui that allow configure all options at the same time. So, before connecting is called simple script that allow customize config file:
+OpenVPN is very flexible VPN solution. It is hard create simple ui that allow configure all options at the same time. If you need more specific configuration for connect to your VPN server, you can write owns config template... Before connecting is called simple script that allow customize config file:
 
 *Default OpenVPN config template*
 {{{
@@ -23,7 +23,7 @@ mode %TOPOLOGY%
 cipher %CIPHER%
 }}}
 
-*Script called before connecting*
+*Script called before connecting* 
 {{{
 #!/bin/sh
 
