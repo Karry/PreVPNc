@@ -1,6 +1,7 @@
 package cz.karry.vpnc;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
@@ -36,63 +37,48 @@ public class OpenVPNConnection extends VpnConnection {
   @Override
   public void run() {
     BufferedReader stdout = null;
-    BufferedReader stderr = null;
     String[] command = String.format("chroot /opt/vpnbox/ /usr/sbin/openvpn /tmp/%s.vpn", profileName).split(" ");
-    long poolInterval = 50;
 
+    log += "\n" + "-- you should put your OpenVPN shared key to /media/internal/.vpn/openvpn_"+profileName+".key" + "\n";
     try {
       try {
         ProcessBuilder pb = new ProcessBuilder(command);
-        pb.redirectErrorStream(false);
+        pb.redirectErrorStream(true);
         this.process = pb.start();
         stdout = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        stderr = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 
         while (getConnectionState() == ConnectionState.CONNECTING
                 || getConnectionState() == ConnectionState.CONNECTED) {
-          if (stdout.ready() || stderr.ready()) {
-            String line = null;
-            if (stdout.ready()) {
-              line = stdout.readLine();
-            } else if (stderr.ready()) {
-              line = stdout.readLine();
-            }
-            if (line == null) {
-              process.waitFor();
-              this.returnCode = process.exitValue();
-              synchronized (connectionLock) {
-                if (returnCode == 0 || (getConnectionState() == ConnectionState.DISCONNECTING)) {
-                  this.setConnectionState(ConnectionState.INACTIVE);
-                } else {
-                  this.setConnectionState(ConnectionState.FAILED);
-                }
-              }
-            } else {
-              // /sbin/ifconfig tun0 10.8.0.2 pointopoint 10.8.0.1 mtu 1500
-              if (line.startsWith("Initialization Sequence Completed")) {
-                synchronized (connectionLock) {
-                  this.setConnectionState(ConnectionState.CONNECTED);
-                  poolInterval = 300;
-                  connectionLock.notifyAll();
-                }
-              }
-              this.log += "\n" + line;
-            }
-          }
-          try {
-            Thread.sleep(poolInterval);
-          } catch (InterruptedException ie) {
-          }
 
+          String line = null;
+          line = stdout.readLine();
+
+          if (line == null || line.length() <= 0) {
+            process.waitFor();
+            this.returnCode = process.exitValue();
+            synchronized (connectionLock) {
+              if (returnCode == 0 || (getConnectionState() == ConnectionState.DISCONNECTING)) {
+                this.setConnectionState(ConnectionState.INACTIVE);
+              } else {
+                this.setConnectionState(ConnectionState.FAILED);
+              }
+            }
+          } else {
+            if (line.endsWith("Initialization Sequence Completed")) {
+              synchronized (connectionLock) {
+                this.setConnectionState(ConnectionState.CONNECTED);
+                connectionLock.notifyAll();
+              }
+            }
+            this.log += "\n" + line;
+          }
         }
         synchronized (connectionLock) {
           connectionLock.notifyAll();
         }
       } finally {
-        if (stderr != null)
-          stderr.close();
         if (stdout != null)
-          stderr.close();
+          stdout.close();
       }
     } catch (Exception e) {
       synchronized (connectionLock) {
@@ -107,7 +93,7 @@ public class OpenVPNConnection extends VpnConnection {
     synchronized (connectionLock) {
       if (getConnectionState() == ConnectionState.CONNECTING
               || getConnectionState() == ConnectionState.CONNECTED) {
-        
+
         setConnectionState(ConnectionState.DISCONNECTING);
         if (this.process != null)
           this.process.destroy();

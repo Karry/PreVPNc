@@ -211,11 +211,14 @@ public class LunaService extends LunaServiceThread {
   @LunaServiceThread.PublicMethod
   public void connectVpn(final ServiceMessage msg) throws JSONException, LSException {
     JSONObject jsonObj = msg.getJSONPayload();
+
+    tcpLogger.log("invoke connectVpn "+jsonObj.toString());
+
     if ((!jsonObj.has("type"))
             || (!jsonObj.has("name"))
             || (!jsonObj.has("host"))
             || (!jsonObj.has("user"))
-            || (!jsonObj.has("pass"))) {
+            || (!jsonObj.has("password"))) {
       msg.respondError("1", "Improperly formatted request. ("+jsonObj.toString()+")");
       return;
     }
@@ -224,7 +227,7 @@ public class LunaService extends LunaServiceThread {
     String name = jsonObj.getString("name");
     String host = jsonObj.getString("host");
     String user = jsonObj.getString("user");
-    String pass = jsonObj.getString("pass");
+    String pass = jsonObj.getString("password");
 
     if (!name.matches("^[a-zA-Z]{1}[a-zA-Z0-9]*$")) {
       msg.respondError("2", "Bad session name format.");
@@ -239,6 +242,7 @@ public class LunaService extends LunaServiceThread {
       String protocol = jsonObj.getString("openvpn_protocol");
       String cipher   = jsonObj.getString("openvpn_cipher");
       this.connectOpenVPN(msg, name, host, user, pass, topology, protocol, cipher);
+      return;
     }
 
     msg.respondError("3", "Undefined vpn type (" + type + ").");
@@ -270,7 +274,7 @@ public class LunaService extends LunaServiceThread {
         throw new IOException(cmd.getResponse());
 
       tcpLogger.log("config writed");
-      PptpConnection conn = new PptpConnection(name);
+      OpenVPNConnection conn = new OpenVPNConnection(name);
       VpnConnection original = vpnConnections.put(name, conn);
       if (original != null)
         original.diconnect();

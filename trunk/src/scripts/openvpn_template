@@ -9,8 +9,8 @@
 
 proto %PROTOCOL%
 dev tun   #default
-client
+#client
 remote %HOST% 1194
-secret /media/internal/.vpn/openvpn.key
+secret /tmp/openvpn_%NAME%.key
 mode %TOPOLOGY%
 cipher %CIPHER%

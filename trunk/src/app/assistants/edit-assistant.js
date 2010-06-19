@@ -8,14 +8,14 @@ function EditAssistant(params){
 
 EditAssistant.prototype.setup = function(){
     
-    this.controller.listen('btn', Mojo.Event.tap, this.buttonEvent.bind(this));
+    //this.controller.listen('btn', Mojo.Event.tap, this.buttonEvent.bind(this));
     
     if (!this.profile)
-        this.profile = {};
+        this.profile = {type: "PPTP", name: "preVPNc"};
     if (!this.profile.routes)
         this.profile.routes = [];
     if (!this.profile.routes[0])
-        this.profile.routes[0] = {};
+        this.profile.routes[0] = {network:"192.168.0.0/24", gateway:"192.168.0.1"};
     
     this.controller.setupWidget(
         "name",
@@ -210,13 +210,19 @@ EditAssistant.prototype.refreshType = function(){
     }
 }
 
-EditAssistant.prototype.buttonEvent = function(event){
+EditAssistant.prototype.cleanup = function(event){
+    this.buttonEvent(null);
+}
+
+EditAssistant.prototype.buttonEvent = function(buttonEvent){
     if (!this.profile)
         this.profile = {};
     
     VpnManager.getInstance().editProfile(this.originalName, this.profile, function(){
-            Mojo.Log.error("pop Scene...");        
-            Mojo.Controller.stageController.popScene();
+            if (buttonEvent && buttonEvent != null){
+                Mojo.Log.error("pop Scene...");        
+                Mojo.Controller.stageController.popScene();
+            }
         },
         function(event){
             Mojo.Log.error("SQL failed "+Object.toJSON(event)); 
