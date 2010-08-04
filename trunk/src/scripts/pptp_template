@@ -20,10 +20,9 @@ name "%USER%"
 # retrieve DNS from peer
 usepeerdns
 
-# use MPPE encryption
-require-mppe
-nomppe-stateful
-require-mppe-128
+# MPPE encryption
+%MPPE%
+%MPPE_STATEFUL%
 
 # we do not require the peer to authenticate itself
 noauth

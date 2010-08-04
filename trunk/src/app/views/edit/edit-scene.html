@@ -30,7 +30,7 @@
 				</div>
 			</div>
 	
-			<div class="palm-row " x-mojo-tap-highlight="momentary">
+			<div class="palm-row last" x-mojo-tap-highlight="momentary">
 				<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
 					<div class="title">
 						<div class="label">
@@ -40,33 +40,54 @@
 					</div>
 				</div>
 			</div>
-			<div class="palm-row " x-mojo-tap-highlight="momentary">
+		</div>
+	</div>
+
+
+
+	<div class="palm-group hidden" id="specificPPTP" >
+		<div class="palm-group-title">
+			PPTP Authorization
+		</div>
+		<div class="palm-list">
+			<div class="palm-row first" x-mojo-tap-highlight="momentary">
 				<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
 					<div class="title">
 						<div class="label">
 							User
 						</div>
-						<div id="user" name="user" x-mojo-element="TextField"></div>
+						<div id="pptp_user" name="pptp_user" x-mojo-element="TextField"></div>
 					</div>
 				</div>
 			</div>
-			<div class="palm-row last" x-mojo-tap-highlight="momentary">
+			<div class="palm-row " x-mojo-tap-highlight="momentary">
 				<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
 					<div class="title">
 						<div class="label">
 							Password
 						</div>
-						<div id="password" name="password" x-mojo-element="TextField"></div>						
+						<div id="pptp_password" name="pptp_password" x-mojo-element="TextField"></div>						
 					</div>
 				</div>
 			</div>
+			
+			<div class="palm-row " x-mojo-tap-highlight="momentary">
+				<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+					<div x-mojo-element="ListSelector" id="pptp_mppe" name="pptp_mppe" class=""></div>
+				</div>
+			</div>
+			<div class="palm-row last" x-mojo-tap-highlight="momentary">
+				<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+					<div x-mojo-element="ListSelector" id="pptp_mppe_stateful" name="pptp_mppe_stateful" class=""></div>
+				</div>
+			</div>			
 		</div>
 	</div>
 
 
 	<div class="palm-group hidden" id="specificOpenVPN" >
 		<div class="palm-group-title">
-			OpenVPN Specific
+			OpenVPN Settings
 		</div>
 		<div class="palm-list">
 			<div class="palm-row first" x-mojo-tap-highlight="momentary">

@@ -7,7 +7,6 @@ import com.palm.luna.service.ServiceMessage;
 import cz.karry.vpnc.VpnConnection.ConnectionState;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -216,18 +215,14 @@ public class LunaService extends LunaServiceThread {
 
     if ((!jsonObj.has("type"))
             || (!jsonObj.has("name"))
-            || (!jsonObj.has("host"))
-            || (!jsonObj.has("user"))
-            || (!jsonObj.has("password"))) {
+            || (!jsonObj.has("configuration"))) {
       msg.respondError("1", "Improperly formatted request. ("+jsonObj.toString()+")");
       return;
     }
 
     String type = jsonObj.getString("type");
     String name = jsonObj.getString("name");
-    String host = jsonObj.getString("host");
-    String user = jsonObj.getString("user");
-    String pass = jsonObj.getString("password");
+    JSONObject configuration = jsonObj.getJSONObject("configuration");
 
     if (!name.matches("^[a-zA-Z]{1}[a-zA-Z0-9]*$")) {
       msg.respondError("2", "Bad session name format.");
@@ -235,13 +230,19 @@ public class LunaService extends LunaServiceThread {
     }
 
     if (type.toLowerCase().equals("pptp")) {
-      connectPptpVpn(msg, name, host, user, pass);
+      String host = configuration.getString("host").replaceAll("\n", "\\\\n");
+      String user = configuration.getString("pptp_user").replaceAll("\n", "\\\\n");
+      String pass = configuration.getString("pptp_password").replaceAll("\n", "\\\\n");
+      String mppe = configuration.getString("pptp_mppe").replaceAll("\n", "\\\\n");
+      String mppe_stateful = configuration.getString("pptp_mppe_stateful").replaceAll("\n", "\\\\n");
+      connectPptpVpn(msg, name, host, user, pass, mppe, mppe_stateful);
       return;
     }else if (type.toLowerCase().equals("openvpn")){
-      String topology = jsonObj.getString("openvpn_topology");
-      String protocol = jsonObj.getString("openvpn_protocol");
-      String cipher   = jsonObj.getString("openvpn_cipher");
-      this.connectOpenVPN(msg, name, host, user, pass, topology, protocol, cipher);
+      String host     = configuration.getString("host").replaceAll("\n", "\\n");
+      String topology = configuration.getString("openvpn_topology");
+      String protocol = configuration.getString("openvpn_protocol");
+      String cipher   = configuration.getString("openvpn_cipher");
+      this.connectOpenVPN(msg, name, host, topology, protocol, cipher);
       return;
     }
 
@@ -251,23 +252,19 @@ public class LunaService extends LunaServiceThread {
   private void connectOpenVPN(ServiceMessage msg,
           String name,
           String host,
-          String user,
-          String pass,
           String topology,
           String protocol,
           String cipher
           ) throws JSONException, LSException {
     //String.format("chroot /opt/vpnbox/ /usr/sbin/openvpn /tmp/%s.vpn", profileName);
     try{
-      String[] arr = new String[8];
+      String[] arr = new String[6];
       arr[0] = String.format("%s/scripts/write_config_openvpn.sh", APP_ROOT);
       arr[1] = String.format("%s", name);
       arr[2] = String.format("%s", host);
-      arr[3] = String.format("%s", user);
-      arr[4] = String.format("%s", pass);
-      arr[5] = String.format("%s", topology);
-      arr[6] = String.format("%s", protocol);
-      arr[7] = String.format("%s", cipher);
+      arr[3] = String.format("%s", topology);
+      arr[4] = String.format("%s", protocol);
+      arr[5] = String.format("%s", cipher);
       
       CommandLine cmd = new CommandLine(arr);
       if (!cmd.doCmd())
@@ -289,7 +286,7 @@ public class LunaService extends LunaServiceThread {
 
   }
 
-  private void connectPptpVpn(ServiceMessage msg, String name, String host, String user, String pass) throws JSONException, LSException {
+  private void connectPptpVpn(ServiceMessage msg, String name, String host, String user, String pass, String mppe, String mppe_stateful) throws JSONException, LSException {
     try {
       if (!loadModules()) {
         msg.respondError("101", "Can't load kernel modules.");
@@ -298,12 +295,14 @@ public class LunaService extends LunaServiceThread {
       tcpLogger.log("modules loaded");
 
       // write config to peer file, user name and password to secrets file
-      String[] arr = new String[5];
+      String[] arr = new String[7];
       arr[0] = String.format("%s/scripts/write_config_pptp.sh", APP_ROOT);
       arr[1] = String.format("%s", name);
       arr[2] = String.format("%s", host);
       arr[3] = String.format("%s", user);
       arr[4] = String.format("%s", pass);
+      arr[5] = String.format("%s", mppe);
+      arr[6] = String.format("%s", mppe_stateful);
       CommandLine cmd = new CommandLine(arr);
       if (!cmd.doCmd())
         throw new IOException(cmd.getResponse());
