@@ -10,7 +10,7 @@ LogAssistant.prototype.setup = function(){
     
     if (this.profile){
         $('log').innerHTML = this.profile.log;
-        $('name').innerHTML = this.profile.name;
+        $('name').innerHTML = this.profile.display_name;
         $('state').innerHTML = this.profile.state;
     }
 }

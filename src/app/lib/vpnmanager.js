@@ -35,6 +35,22 @@ VpnManager.prototype.dbConnect = function(){
                     function(event){
                         Mojo.Log.error("error when creating table vpn_profile"); 
                     });
+    
+    // create tables, if these don't exist
+    var strSQL =  "CREATE TABLE IF NOT EXISTS `vpn_profile2` ("
+                + "`name` VARCHAR(255) NOT NULL ,"
+                + "`type` VARCHAR(255) NOT NULL ,"
+                + "`display_name` VARCHAR(255) NOT NULL ,"
+                + "`configuration` TEXT NOT NULL,"
+                + "  PRIMARY KEY (`name`)"
+                + ");";
+    this.executeSQL(strSQL,
+                    function(event){
+                        Mojo.Log.error("table vpn_profile created"); 
+                    },
+                    function(event){
+                        Mojo.Log.error("error when creating table vpn_profile"); 
+                    });
 
     var strSQL =  "CREATE TABLE IF NOT EXISTS `vpn_route` ("
                 + "`profile_name` VARCHAR(255) NOT NULL ,"
@@ -118,6 +134,7 @@ VpnManager.prototype.loadProfiles = function( controller, upatedProfileHandler ,
                                     );
                 };
                 
+    /*
     openVPNConfigLoader = function(vpnManagerObj, controller, item, loadRoutes, routesHandler, tableErrorHandler){
         vpnManagerObj.executeSQL("SELECT * FROM `vpn_spec_openvpn` WHERE `profile_name` = '"+item.name+"';",
                         function(transaction2, result2){
@@ -138,27 +155,20 @@ VpnManager.prototype.loadProfiles = function( controller, upatedProfileHandler ,
                         },
                         tableErrorHandler);        
     }
-
+    */
     
     /**
      * I know, this construction is crazy, bad how to execute many dependent SQL in asynchronous API?
      */
-    this.executeSQL("SELECT *, 'UNDEFINED' AS `state` FROM `vpn_profile` ORDER BY `name`;",
+    this.executeSQL("SELECT *, 'UNDEFINED' AS `state` FROM `vpn_profile2` ORDER BY `name`;",
                     
                     function(transaction, result){
                         if (result.rows){
                             Mojo.Log.error("loaded profiles: "+result.rows.length); 
                             for (i = 0; i< result.rows.length; i++){
                                 item = Object.clone(result.rows.item(i));
-                                
-                                if (item.type == "OpenVPN"){
-                                    //Mojo.Log.error("select '"+item.name+"' specific config...");
-                                    openVPNConfigLoader(vpnManagerObj, controller, item, loadRoutes, routesHandler, tableErrorHandler);
-                                }else{
-                                    //Mojo.Log.error("select routes for '"+item.name+"' ("+item.type+")..."); 
-                                    loadRoutes(controller, item, routesHandler, tableErrorHandler);
-                                }
-                                
+                                item.configuration =  eval('(' + item.configuration + ')');
+                                loadRoutes(controller, item, routesHandler, tableErrorHandler);
                             }
                         }else{
                             tableErrorHandler({message:"bad db result ", code:-1});
@@ -251,16 +261,6 @@ VpnManager.prototype.connect = function(controller, profile, errorHandler){
 		                                  onFailure: errorHandler
 	                                   }
 									   );
-    /*
-										  {
-											type: profile.type,
-											host: profile.host,
-											name: profile.name,
-											user: profile.user,
-											pass: profile.password
-		                                  },
-     
-    */
 }
 
 VpnManager.prototype.connectionStateChanged = function(controller, obj, profile){
@@ -310,17 +310,18 @@ VpnManager.prototype.editProfile = function(originalName, profile, successHandle
     index = 0;
     if (originalName){
         sqlArr[index++] = "DELETE FROM `vpn_route` WHERE `profile_name` = '"+originalName+"'; ";
-        sqlArr[index++] = "DELETE FROM `vpn_profile` WHERE `name` = '"+originalName+"'; ";
-        sqlArr[index++] = "DELETE FROM `vpn_spec_openvpn` WHERE `profile_name` = '"+originalName+"'; ";
+        sqlArr[index++] = "DELETE FROM `vpn_profile2` WHERE `name` = '"+originalName+"'; ";
+        //sqlArr[index++] = "DELETE FROM `vpn_spec_openvpn` WHERE `profile_name` = '"+originalName+"'; ";
     }
-    sqlArr[index++] =  "INSERT INTO `vpn_profile` (`name`,`type`,`host`,`user`,`password`) "
-                + "VALUES ('"+profile.name+"','"+profile.type+"','"+profile.host+"','"+profile.user+"','"+profile.password+"');";
+    sqlArr[index++] =  "INSERT INTO `vpn_profile2` (`name`,`display_name`,`type`,`configuration`) "
+                + "VALUES ('"+profile.name+"','"+profile.display_name+"','"+profile.type+"','"+Object.toJSON(profile.configuration)+"');";
      
-
+    /*
     if (profile.type == "OpenVPN"){        
         sqlArr[index++] = "INSERT INTO `vpn_spec_openvpn` (`profile_name`, `topology`, `protocol`, `cipher`) "
                         + "VALUES ('"+profile.name+"', '"+profile.openvpn_topology+"', '"+profile.openvpn_protocol+"', '"+profile.openvpn_cipher+"'); ";
     }
+    */
 
     if (profile.routes.length > 0){
         strSQL = "INSERT INTO `vpn_route` (`profile_name`, `network`, `gateway`) VALUES ";
@@ -351,10 +352,7 @@ VpnManager.prototype.deleteProfile = function(profile, successHandler, errorHand
     var sqlArr =  [];
     index = 0;
     sqlArr[index++] = "DELETE FROM `vpn_route` WHERE `profile_name` = '"+profile.name+"'; ";
-    sqlArr[index++] = "DELETE FROM `vpn_profile` WHERE `name` = '"+profile.name+"'; ";
-    if (profile.type == "OpenVPN"){
-        sqlArr[index++] = "DELETE FROM `vpn_spec_openvpn` WHERE `profile_name` = '"+profile.name+"'; ";
-    }
+    sqlArr[index++] = "DELETE FROM `vpn_profile2` WHERE `name` = '"+profile.name+"'; ";
     
     l = this.listeners;
     this.executeSQLs(sqlArr, function(a,b){

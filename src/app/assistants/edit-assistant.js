@@ -2,7 +2,6 @@
 function EditAssistant(params){
     if (params.profile){
         this.profile = params.profile;
-        this.originalName = this.profile.name;
     }
 }
 
@@ -11,7 +10,7 @@ EditAssistant.prototype.setup = function(){
     //this.controller.listen('btn', Mojo.Event.tap, this.buttonEvent.bind(this));
     
     if (!this.profile)
-        this.profile = {type: "PPTP", name: "preVPNc"};
+        this.profile = {type: "PPTP", name: "VPN"+this.formatDate(new Date()), display_name:"preVPNc", configuration: {}};
     if (!this.profile.routes)
         this.profile.routes = [];
     if (!this.profile.routes[0])
@@ -20,13 +19,13 @@ EditAssistant.prototype.setup = function(){
     this.controller.setupWidget(
         "name",
         this.urlAttributes = {
-            modelProperty: "name",
+            modelProperty: "display_name",
             limitResize: true,
             textReplacement: false,
             enterSubmits: false
         },
 		this.profile
-    );    
+    );
     this.controller.setupWidget(
         "host",
         this.urlAttributes = {
@@ -35,28 +34,21 @@ EditAssistant.prototype.setup = function(){
             textReplacement: false,
             enterSubmits: false
         },
-		this.profile
-    );    
+		this.profile.configuration
+    );
     this.controller.setupWidget(
-        "user",
-        this.urlAttributes = {
-            modelProperty: "user",
-            limitResize: true,
-            textReplacement: false,
-            enterSubmits: false
-        },
-		this.profile
-    );    
-    this.controller.setupWidget(
-        "password",
-        this.urlAttributes = {
-            modelProperty: "password",
-            limitResize: true,
-            textReplacement: false,
-            enterSubmits: false
-        },
-		this.profile
-    );    
+        "type",
+        this.attributes = {
+            modelProperty: 'type',
+            label: $L('VPN Type'),            
+            choices: [
+                {label: "PPTP", value: "PPTP"},
+                {label: "OpenVPN", value: "OpenVPN"}
+            ]},
+        this.profile
+    );
+    
+    
     this.controller.setupWidget(
         "network",
         this.urlAttributes = {
@@ -79,18 +71,50 @@ EditAssistant.prototype.setup = function(){
     );
     
     
+    // PPTP specific values
     this.controller.setupWidget(
-        "type",
-        this.attributes = {
-            modelProperty: 'type',
-            label: $L('VPN Type'),            
-            choices: [
-                {label: "PPTP", value: "PPTP"},
-                {label: "OpenVPN", value: "OpenVPN"}
-            ]},
-        this.profile
+        "pptp_user",
+        this.urlAttributes = {
+            modelProperty: "pptp_user",
+            limitResize: true,
+            textReplacement: false,
+            enterSubmits: false
+        },
+		this.profile.configuration
+    );    
+    this.controller.setupWidget(
+        "pptp_password",
+        this.urlAttributes = {
+            modelProperty: "pptp_password",
+            limitResize: true,
+            textReplacement: false,
+            enterSubmits: false
+        },
+		this.profile.configuration
     );
-    
+    this.controller.setupWidget(
+        "pptp_mppe",
+        this.attributes = {
+            modelProperty: 'pptp_mppe',
+            label: $L('MPPE'),  
+            choices: [
+                {label: $L("Require 128 bit"), value: "require-mppe\nrequire-mppe-128"},
+                {label: $L("Require"), value: "require-mppe"},
+                {label: $L("Don't use"), value: "nomppe"},
+            ]},
+        this.profile.configuration
+   );    
+    this.controller.setupWidget(
+        "pptp_mppe_stateful",
+        this.attributes = {
+            modelProperty: 'pptp_mppe_stateful',
+            label: $L('MPPE Stateful'),  
+            choices: [
+                {label: $L("Permit"), value: "nomppe-stateful"},
+                {label: $L("Allow"), value: "# allow mppe stateful"},
+            ]},
+        this.profile.configuration
+   );
     
     // OpenVPN specific values
     this.controller.setupWidget(
@@ -103,7 +127,7 @@ EditAssistant.prototype.setup = function(){
                 {label: "p2p", value: "p2p"},
                 {label: "net30", value: "net30"},
             ]},
-        this.profile
+        this.profile.configuration
 
     );
     this.controller.setupWidget(
@@ -115,7 +139,7 @@ EditAssistant.prototype.setup = function(){
                 {label: "TCP", value: "tcp"},
                 {label: "UDP", value: "udp"},
             ]},
-        this.profile
+        this.profile.configuration
    );
     this.controller.setupWidget(
         "openvpn_cipher",
@@ -181,16 +205,30 @@ EditAssistant.prototype.setup = function(){
                 {label: "SEED-OFB", value: "SEED-OFB"},
                 {label: "SEED-CFB", value: "SEED-CFB"},
             ]},
-        this.profile
+        this.profile.configuration
     );
     
     this.specificConfig = [];
+    this.specificConfig["PPTP"] = { elementId: 'specificPPTP'};
     this.specificConfig["OpenVPN"] = { elementId: 'specificOpenVPN'};
     
     this.refreshType();
     this.controller.listen('type', Mojo.Event.propertyChange , this.refreshType.bind(this));
 }
 
+
+EditAssistant.prototype.formatDate = function(dateobj){
+	strRes = "NA";
+	secs = dateobj.getSeconds(); if (secs > 9) strSecs = String(secs); else strSecs = "0" + String(secs);
+	mins = dateobj.getMinutes(); if (mins > 9) strMins = String(mins); else strMins = "0" + String(mins);
+	hrs  = dateobj.getHours(); if (hrs > 9) strHrs = String(hrs); else strHrs = "0" + String(hrs);
+	day  = dateobj.getDate(); if (day > 9) strDays = String(day); else strDays = "0" + String(day);
+	mnth = dateobj.getMonth() + 1; if (mnth > 9) strMnth = String(mnth); else strMnth = "0" + String(mnth);
+	yr   = dateobj.getFullYear(); strYr = String(yr);
+
+    strRes = strYr + strMnth + strDays + "" + strHrs + strMins + strSecs;
+	return strRes
+}
 
 EditAssistant.prototype.refreshType = function(){
     
@@ -218,7 +256,7 @@ EditAssistant.prototype.buttonEvent = function(buttonEvent){
     if (!this.profile)
         this.profile = {};
     
-    VpnManager.getInstance().editProfile(this.originalName, this.profile, function(){
+    VpnManager.getInstance().editProfile(this.profile.name, this.profile, function(){
             if (buttonEvent && buttonEvent != null){
                 Mojo.Log.error("pop Scene...");        
                 Mojo.Controller.stageController.popScene();

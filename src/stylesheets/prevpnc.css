@@ -35,3 +35,19 @@ pre{
 .hidden{
     display:none;
 }
+
+.INACTIVE{
+    color: inherit;
+}
+.DISCONNECTING{
+    color: inherit;
+}
+.CONNECTING{
+    color: yellow;
+}
+.CONNECTED{
+    color: green;
+}
+.FAILED{
+    color: red;
+}

@@ -64,16 +64,10 @@ MainAssistant.prototype.listAddHandler = function(event){
 }
 
 MainAssistant.prototype.listDeleteHandler = function(event){
-	
 	this.currentModel.items.splice(this.currentModel.items.indexOf(event.item), 1);
-    Mojo.log("EditablelistAssistant deleting '"+event.item.data+"'.");
+    Mojo.log("EditablelistAssistant deleting '"+event.item.name+"'.");
 	VpnManager.getInstance().deleteProfile( event.item,
-			function(){
-				/*
-				if (event.type == "mojo-list-tap") // event from context menu, not from "slide" delete
-					this.controller.modelChanged(this.currentModel);
-				*/
-			},
+			function(){},
 			this.tableErrorHandler.bind(this));
 }
 
@@ -123,7 +117,7 @@ MainAssistant.prototype.handleTrackTap = function(event){
                     }.bind(this),
                     title: $L("Delete?"),
                     message: $L("Are you sure you want to delete profile #{profilename}?")
-                            .interpolate({profilename:"\"" + event.item.name +"\""}),
+                            .interpolate({profilename:"\"" + event.item.display_name +"\""}),
                     choices:[
                         {label:$L('Yes'), value:"yes", type:'affirmative'},
                         {label:$L('No'), value:"no", type:'negative'}
