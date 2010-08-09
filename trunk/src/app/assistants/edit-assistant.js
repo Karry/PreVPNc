@@ -214,6 +214,11 @@ EditAssistant.prototype.setup = function(){
     
     this.refreshType();
     this.controller.listen('type', Mojo.Event.propertyChange , this.refreshType.bind(this));
+    
+    
+    $('OpenVPNkeyNote').innerHTML 	=  $L("Your key, certificate and authority certificate put to "
+                                          + "<b>.vpn/openvpn_#{name}.key</b>, <b>.vpn/openvpn_#{name}.crt</b> and <b>.vpn/openvpn_#{name}.ca.crt</b>.<br />"
+                                          + "For more information read <a href=\"http://code.google.com/p/prevpnc/wiki/Howto\">project wiki</a>.").interpolate({name: this.profile.name })
 }
 
 

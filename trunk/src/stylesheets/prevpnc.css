@@ -1,4 +1,8 @@
 
+.note{
+    padding:5px;
+    font-size: medium;
+}
 
 .palm-page-header .header-icon.prevpnc-icon32{
     background: url(../images/icon32.png) no-repeat;
