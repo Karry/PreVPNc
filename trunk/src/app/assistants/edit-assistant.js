@@ -43,7 +43,8 @@ EditAssistant.prototype.setup = function(){
             label: $L('VPN Type'),            
             choices: [
                 {label: "PPTP", value: "PPTP"},
-                {label: "OpenVPN", value: "OpenVPN"}
+                {label: "OpenVPN", value: "OpenVPN"},
+                {label: "Cisco", value: "Cisco"}
             ]},
         this.profile
     );
@@ -207,10 +208,84 @@ EditAssistant.prototype.setup = function(){
             ]},
         this.profile.configuration
     );
+	
+	// Cisco specific values
+	/*
+	cisco_userid
+	cisco_userpasstype
+	cisco_userpass
+	cisco_groupid
+	cisco_grouppasstype
+	cisco_grouppass
+	*/
+    this.controller.setupWidget(
+        "cisco_userpasstype",
+        this.attributes = {
+            modelProperty: 'cisco_userpasstype',
+            label: $L('Pass. Type'),  
+            choices: [
+                {label: "Text", value: "Xauth password "},
+                {label: "Obfuscated", value: "Xauth obfuscated password "}
+            ]},
+        this.profile.configuration
+   );	
+    this.controller.setupWidget(
+        "cisco_grouppasstype",
+        this.attributes = {
+            modelProperty: 'cisco_grouppasstype',
+            label: $L('Secret Type'),  
+            choices: [
+                {label: "None", value: "# no IPSec secret "},
+                {label: "Text", value: "IPSec secret "},
+                {label: "Obfuscated", value: "IPSec obfuscated secret "}
+            ]},
+        this.profile.configuration
+   );
+    this.controller.setupWidget(
+        "cisco_userid",
+        this.urlAttributes = {
+            modelProperty: "cisco_userid",
+            limitResize: true,
+            textReplacement: false,
+            enterSubmits: false
+        },
+		this.profile.configuration
+    );	
+    this.controller.setupWidget(
+        "cisco_userpass",
+        this.urlAttributes = {
+            modelProperty: "cisco_userpass",
+            limitResize: true,
+            textReplacement: false,
+            enterSubmits: false
+        },
+		this.profile.configuration
+    );	
+    this.controller.setupWidget(
+        "cisco_groupid",
+        this.urlAttributes = {
+            modelProperty: "cisco_groupid",
+            limitResize: true,
+            textReplacement: false,
+            enterSubmits: false
+        },
+		this.profile.configuration
+    );	
+    this.controller.setupWidget(
+        "cisco_grouppass",
+        this.urlAttributes = {
+            modelProperty: "cisco_grouppass",
+            limitResize: true,
+            textReplacement: false,
+            enterSubmits: false
+        },
+		this.profile.configuration
+    );	
     
     this.specificConfig = [];
     this.specificConfig["PPTP"] = { elementId: 'specificPPTP'};
     this.specificConfig["OpenVPN"] = { elementId: 'specificOpenVPN'};
+    this.specificConfig["Cisco"] = { elementId: 'specificCisco'};
     
     this.refreshType();
     this.controller.listen('type', Mojo.Event.propertyChange , this.refreshType.bind(this));
