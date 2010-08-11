@@ -21,7 +21,7 @@ public class LunaService extends LunaServiceThread {
   /**
    * on PC (192.168.0.200) is possible read log by netcat... netcat -lv -p 1234
    */
-  private TcpLogger tcpLogger = new TcpLogger("/media/internal/.vpn/debug.conf");
+  private TcpLogger tcpLogger = TcpLogger.getInstance();
 
   public LunaService() {
     super();
@@ -139,7 +139,7 @@ public class LunaService extends LunaServiceThread {
     if (conn != null) {
       state = conn.getConnectionState();
       log = conn.getLog();
-      if (state == VpnConnection.ConnectionState.CONNECTED) {
+      if (state == AbstractVpnConnection.ConnectionState.CONNECTED) {
         reply.put("localAddress", conn.getLocalAddress());
       }
     }
@@ -231,6 +231,7 @@ public class LunaService extends LunaServiceThread {
 
     if (type.toLowerCase().equals("pptp")) {
       String host = configuration.getString("host").replaceAll("\n", "\\\\n");
+
       String user = configuration.getString("pptp_user").replaceAll("\n", "\\\\n");
       String pass = configuration.getString("pptp_password").replaceAll("\n", "\\\\n");
       String mppe = configuration.getString("pptp_mppe").replaceAll("\n", "\\\\n");
@@ -238,11 +239,23 @@ public class LunaService extends LunaServiceThread {
       connectPptpVpn(msg, name, host, user, pass, mppe, mppe_stateful);
       return;
     }else if (type.toLowerCase().equals("openvpn")){
-      String host     = configuration.getString("host").replaceAll("\n", "\\n");
+      String host = configuration.getString("host").replaceAll("\n", "\\\\n");
+
       String topology = configuration.getString("openvpn_topology");
       String protocol = configuration.getString("openvpn_protocol");
       String cipher   = configuration.getString("openvpn_cipher");
       this.connectOpenVPN(msg, name, host, topology, protocol, cipher);
+      return;
+    }else if (type.toLowerCase().equals("cisco")){
+      String host = configuration.getString("host").replaceAll("\n", "\\\\n");
+
+      String userid = configuration.getString("cisco_userid").replaceAll("\n", "\\\\n");
+      String userpass = configuration.getString("cisco_userpass").replaceAll("\n", "\\\\n");
+      String groupid = configuration.getString("cisco_groupid").replaceAll("\n", "\\\\n");
+      String grouppass = configuration.getString("cisco_grouppass").replaceAll("\n", "\\\\n");
+      String userpasstype = configuration.getString("cisco_userpasstype");
+      String grouppasstype = configuration.getString("cisco_grouppasstype");
+      this.connectCiscoVpn(msg, name, host, userid, userpass, userpasstype, groupid, grouppass, grouppasstype);
       return;
     }
 
@@ -322,6 +335,49 @@ public class LunaService extends LunaServiceThread {
     }
   }
 
+  private void connectCiscoVpn(
+          ServiceMessage msg,
+          String name,
+          String host,
+          String userid,
+          String userpass,
+          String userpasstype,
+          String groupid,
+          String grouppass,
+          String grouppasstype) throws JSONException, LSException {
+
+    try{
+      String[] arr = new String[9];
+      arr[0] = String.format("%s/scripts/write_config_cisco.sh", APP_ROOT);
+      arr[1] = String.format("%s", name);
+      arr[2] = String.format("%s", host);
+      arr[3] = String.format("%s", userid);
+      arr[4] = String.format("%s", userpass);
+      arr[5] = String.format("%s", userpasstype);
+      arr[6] = String.format("%s", groupid);
+      arr[7] = String.format("%s", grouppass);
+      arr[8] = String.format("%s", grouppasstype);
+
+      CommandLine cmd = new CommandLine(arr);
+      if (!cmd.doCmd())
+        throw new IOException(cmd.getResponse());
+
+      tcpLogger.log("config writed");
+      CiscoConnection conn = new CiscoConnection(name);
+      VpnConnection original = vpnConnections.put(name, conn);
+      if (original != null)
+        original.diconnect();
+
+      conn.addStateListener(new ConnectionStateListenerImpl(msg, conn));
+      conn.start();
+      //conn.waitWhileConnecting();
+    } catch (Exception ex) {
+      msg.respondError("102", "Error while connecting: " + ex.getMessage() + " (" + ex.getClass().getName() + ")");
+      return;
+    }
+    
+  }
+
   class ConnectionStateListenerImpl implements ConnectionStateListener{
     private final ServiceMessage msg;
     private final VpnConnection conn;
@@ -341,7 +397,7 @@ public class LunaService extends LunaServiceThread {
         reply.put("stateChanged", true);
         reply.put("listenerId",listenerId);
         reply.put("log", conn.getLog());
-        if (state == VpnConnection.ConnectionState.CONNECTED) {
+        if (state == AbstractVpnConnection.ConnectionState.CONNECTED) {
           reply.put("localAddress", conn.getLocalAddress());
         }
         msg.respond(reply.toString());

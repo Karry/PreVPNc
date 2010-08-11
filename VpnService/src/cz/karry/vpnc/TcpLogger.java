@@ -13,9 +13,17 @@ import java.util.Properties;
  */
 public class TcpLogger {
 
+  private static TcpLogger instance;
+
+  static TcpLogger getInstance() {
+    if (instance == null)
+      instance = new TcpLogger("/media/internal/.vpn/debug.conf");
+    return instance;
+  }
+
   private PrintWriter writer = null;
 
-  TcpLogger(String configFile) {
+  private TcpLogger(String configFile) {
     Properties prop = new Properties();
     Socket socket;
     try {
