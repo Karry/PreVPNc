@@ -224,8 +224,8 @@ EditAssistant.prototype.setup = function(){
             modelProperty: 'cisco_userpasstype',
             label: $L('Pass. Type'),  
             choices: [
-                {label: "Text", value: "Xauth password "},
-                {label: "Obfuscated", value: "Xauth obfuscated password "}
+                {label: "Text", value: "Xauth password"},
+                {label: "Obfuscated", value: "Xauth obfuscated password"}
             ]},
         this.profile.configuration
    );	
@@ -235,9 +235,9 @@ EditAssistant.prototype.setup = function(){
             modelProperty: 'cisco_grouppasstype',
             label: $L('Secret Type'),  
             choices: [
-                {label: "None", value: "# no IPSec secret "},
-                {label: "Text", value: "IPSec secret "},
-                {label: "Obfuscated", value: "IPSec obfuscated secret "}
+                {label: "None", value: "# no IPSec secret"},
+                {label: "Text", value: "IPSec secret"},
+                {label: "Obfuscated", value: "IPSec obfuscated secret"}
             ]},
         this.profile.configuration
    );
