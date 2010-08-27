@@ -1,6 +1,8 @@
 package cz.karry.vpnc;
 
+import ca.canucksoftware.systoolsmgr.CommandLine;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +20,7 @@ abstract class AbstractVpnConnection extends Thread implements VpnConnection{
   protected final List<ConnectionStateListener> stateListeners = new LinkedList<ConnectionStateListener>();
   protected final static Object listenerCounterLock = new Object();
   protected static volatile int listenerCounter = 0;
+  protected int MAX_LOG_SIZE = 2048;
 
   protected final Object connectionLock = new Object();
   protected int returnCode = 0;
@@ -108,6 +111,8 @@ abstract class AbstractVpnConnection extends Thread implements VpnConnection{
               }
             }
             this.log += "\n" + line;
+            if (log.length() > MAX_LOG_SIZE)
+              log = log.substring(log.length() - MAX_LOG_SIZE);
           }
         }
         synchronized (connectionLock) {
@@ -169,6 +174,19 @@ abstract class AbstractVpnConnection extends Thread implements VpnConnection{
       this.setConnectionState(ConnectionState.CONNECTING);
     }
     super.start();
+  }
+
+  public void updateDns(boolean flush, String nameserver){
+    String str = String.format("%s/scripts/update_dns.sh %s %s", LunaService.APP_ROOT, flush ? "flush" : "noflush", nameserver);
+    if (str != null){
+      try {
+        CommandLine cmd = new CommandLine(str);
+        if (!cmd.doCmd())
+          throw new IOException("Command "+str +" failed "+cmd.getResponse());
+      } catch (Exception e) {
+        TcpLogger.getInstance().log(e.getMessage(), e);
+      }
+    }
   }
 
   abstract protected void handleLog(String line);
