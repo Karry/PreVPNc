@@ -18,6 +18,7 @@ APP_PATH=/media/cryptofs/apps/usr/palm/applications/cz.karry.vpnc
 
 /bin/cp -f $APP_PATH/service/cz.karry.vpnc /etc/event.d/cz.karry.vpnc
 
+mkdir -p /opt
 cd /opt
 zcat $APP_PATH/vpnbox.tar.gz | tar -xf -
 rm $APP_PATH/vpnbox.tar.gz

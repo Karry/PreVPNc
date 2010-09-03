@@ -1,0 +1,6 @@
+
+add localhost to resolv.conf everytime
+
+after disconect all vpns, revert /etc/resolv.conf as symbolic link to /var/run/resolv.conf (?)
+
+move configuration to tmpfs (RAM) filesystem -> make possible remount filesystem as ro
