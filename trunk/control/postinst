@@ -23,6 +23,9 @@ cd /opt
 zcat $APP_PATH/vpnbox.tar.gz | tar -xf -
 rm $APP_PATH/vpnbox.tar.gz
 
+## force add symlink from /etc/resolv.conf to /opt/vpnbox/etc/resolv.conf
+ln -sf /opt/vpnbox/etc/resolv.conf /etc/resolv.conf
+
 if [ -z "$IPKG_OFFLINE_ROOT" ]; then
   killall -9 java
   mount -o remount,ro /

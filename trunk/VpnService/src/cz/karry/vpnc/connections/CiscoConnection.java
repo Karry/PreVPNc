@@ -1,0 +1,29 @@
+package cz.karry.vpnc.connections;
+
+import cz.karry.vpnc.DnsManager;
+import cz.karry.vpnc.LunaService;
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ *
+ * @author karry
+ */
+public class CiscoConnection extends AbstractVpnConnection {
+
+  private List<String> dnsAdresses = new LinkedList<String>();
+
+  public CiscoConnection(String name) {
+    super(name,
+            String.format("chroot " + LunaService.VPNBOX_DIR + " /usr/sbin/vpnc --debug 2 --no-detach /tmp/%s", name),
+            "vpnc version");
+  }
+
+  @Override
+  protected void handleLog(String line) {
+    if (line.startsWith("nameserver ")){
+      dnsAdresses.add( line.substring("nameserver ".length()) );
+      DnsManager.getInstance().addNameserver(dnsAdresses.toArray(new String[dnsAdresses.size()]), this);
+    }
+  }
+}

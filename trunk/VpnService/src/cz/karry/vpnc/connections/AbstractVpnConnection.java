@@ -1,6 +1,8 @@
-package cz.karry.vpnc;
+package cz.karry.vpnc.connections;
 
 import ca.canucksoftware.systoolsmgr.CommandLine;
+import cz.karry.vpnc.LunaService;
+import cz.karry.vpnc.TcpLogger;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,15 +13,13 @@ import java.util.List;
  *
  * @author karry
  */
-abstract class AbstractVpnConnection extends Thread implements VpnConnection{
+public abstract class AbstractVpnConnection extends Thread implements VpnConnection{
 
   private volatile ConnectionState connectionState = ConnectionState.INACTIVE;
   protected final String profileName;
   protected String log = "";
   protected String localAddress;
   protected final List<ConnectionStateListener> stateListeners = new LinkedList<ConnectionStateListener>();
-  protected final static Object listenerCounterLock = new Object();
-  protected static volatile int listenerCounter = 0;
   protected int MAX_LOG_SIZE = 2048;
 
   protected final Object connectionLock = new Object();
@@ -58,7 +58,7 @@ abstract class AbstractVpnConnection extends Thread implements VpnConnection{
   public void setConnectionState(ConnectionState state) {
     if (state != this.connectionState){
       for (ConnectionStateListener listener : stateListeners){
-        listener.stateChanged(profileName,state,listener.getId());
+        listener.stateChanged(profileName,state);
       }
     }
     this.connectionState = state;
@@ -146,11 +146,6 @@ abstract class AbstractVpnConnection extends Thread implements VpnConnection{
   }
 
   public boolean addStateListener(ConnectionStateListener l) {
-    int id = 0;
-    synchronized( listenerCounterLock ){
-      id = AbstractVpnConnection.listenerCounter++;
-    }
-    l.setId(id);
     return stateListeners.add(l);
   }
 
@@ -176,17 +171,9 @@ abstract class AbstractVpnConnection extends Thread implements VpnConnection{
     super.start();
   }
 
-  public void updateDns(boolean flush, String nameserver){
-    String str = String.format("%s/scripts/update_dns.sh %s %s", LunaService.APP_ROOT, flush ? "flush" : "noflush", nameserver);
-    if (str != null){
-      try {
-        CommandLine cmd = new CommandLine(str);
-        if (!cmd.doCmd())
-          throw new IOException("Command "+str +" failed "+cmd.getResponse());
-      } catch (Exception e) {
-        TcpLogger.getInstance().log(e.getMessage(), e);
-      }
-    }
+  @Override
+  public String toString() {
+    return this.getClass()+" {" + "profileName=" + profileName + '}';
   }
 
   abstract protected void handleLog(String line);

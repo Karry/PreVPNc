@@ -18,6 +18,9 @@ fi
 
 /bin/rm -rf /opt/vpnbox
 
+## revert /etc/resolv.conf symlink
+ln -sf /var/run/resolv.conf /etc/resolv.conf
+
 if [ -z "$IPKG_OFFLINE_ROOT" ]; then
   killall -9 java
   mount -o remount,ro /

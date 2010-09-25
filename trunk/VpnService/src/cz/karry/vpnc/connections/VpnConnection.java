@@ -1,11 +1,11 @@
 
-package cz.karry.vpnc;
+package cz.karry.vpnc.connections;
 
 /**
  *
  * @author karry
  */
-interface VpnConnection {
+public interface VpnConnection {
 
   public enum ConnectionState {
     CONNECTING,

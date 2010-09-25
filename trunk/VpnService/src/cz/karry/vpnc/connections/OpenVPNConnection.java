@@ -1,4 +1,6 @@
-package cz.karry.vpnc;
+package cz.karry.vpnc.connections;
+
+import cz.karry.vpnc.LunaService;
 
 /**
  *
@@ -8,7 +10,7 @@ public class OpenVPNConnection extends AbstractVpnConnection {
 
   public OpenVPNConnection(String name) {
     super(  name,
-            String.format("chroot /opt/vpnbox/ /usr/sbin/openvpn /tmp/%s.vpn", name),
+            String.format("chroot " + LunaService.VPNBOX_DIR + " /usr/sbin/openvpn /tmp/%s.vpn", name),
             "Initialization Sequence Completed");
   }
 
