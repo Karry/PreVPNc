@@ -15,7 +15,7 @@ public class TcpLogger {
 
   private static TcpLogger instance;
 
-  static TcpLogger getInstance() {
+  public static TcpLogger getInstance() {
     if (instance == null)
       instance = new TcpLogger("/media/internal/.vpn/debug.conf");
     return instance;

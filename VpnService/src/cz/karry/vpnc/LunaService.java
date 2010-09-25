@@ -1,10 +1,16 @@
 package cz.karry.vpnc;
 
+import cz.karry.vpnc.connections.CiscoConnection;
+import cz.karry.vpnc.connections.ConnectionStateListener;
+import cz.karry.vpnc.connections.OpenVPNConnection;
+import cz.karry.vpnc.connections.PptpConnection;
+import cz.karry.vpnc.connections.AbstractVpnConnection;
+import cz.karry.vpnc.connections.VpnConnection.ConnectionState;
 import ca.canucksoftware.systoolsmgr.CommandLine;
 import com.palm.luna.LSException;
 import com.palm.luna.service.LunaServiceThread;
 import com.palm.luna.service.ServiceMessage;
-import cz.karry.vpnc.VpnConnection.ConnectionState;
+import cz.karry.vpnc.connections.VpnConnection;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +19,11 @@ import org.json.JSONObject;
 
 public class LunaService extends LunaServiceThread {
 
+  protected static final Object listenerCounterLock = new Object();
+  protected static volatile int listenerCounter = 0;
+
   public static final String APP_ROOT = "/media/cryptofs/apps/usr/palm/applications/cz.karry.vpnc/";
+  public static final String VPNBOX_DIR = "/opt/vpnbox/";
   public static final String GATEWAY_REGEXP = "^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$";
   public static final String NETWOK_REGEXP = "^(default|[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}/[0-9]{1,2})$";
   private boolean pptpModulesLoaded = false;
@@ -169,7 +179,7 @@ public class LunaService extends LunaServiceThread {
     VpnConnection conn = vpnConnections.get(name);
     if (conn != null){
       tcpLogger.log("add listener for "+name);
-      conn.addStateListener(new ConnectionStateListenerImpl(msg, conn));
+      conn.addStateListener(new ConnectionStateListenerImpl(msg, conn, this.getNextListenerId()));
     }
   }
 
@@ -202,7 +212,7 @@ public class LunaService extends LunaServiceThread {
       return;
     }
 
-    conn.addStateListener(new ConnectionStateListenerImpl(msg, conn));
+    conn.addStateListener(new ConnectionStateListenerImpl(msg, conn,this.getNextListenerId()));
     conn.diconnect();
     //msg.respondTrue();
   }
@@ -289,7 +299,7 @@ public class LunaService extends LunaServiceThread {
       if (original != null)
         original.diconnect();
 
-      conn.addStateListener(new ConnectionStateListenerImpl(msg, conn));
+      conn.addStateListener(new ConnectionStateListenerImpl(msg, conn,this.getNextListenerId()));
       conn.start();
       //conn.waitWhileConnecting();
     } catch (Exception ex) {
@@ -326,7 +336,7 @@ public class LunaService extends LunaServiceThread {
       if (original != null)
         original.diconnect();
 
-      conn.addStateListener(new ConnectionStateListenerImpl(msg, conn));
+      conn.addStateListener(new ConnectionStateListenerImpl(msg, conn, this.getNextListenerId()));
       conn.start();
       //conn.waitWhileConnecting();
     } catch (Exception ex) {
@@ -368,7 +378,7 @@ public class LunaService extends LunaServiceThread {
       if (original != null)
         original.diconnect();
 
-      conn.addStateListener(new ConnectionStateListenerImpl(msg, conn));
+      conn.addStateListener(new ConnectionStateListenerImpl(msg, conn, this.getNextListenerId()));
       conn.start();
       //conn.waitWhileConnecting();
     } catch (Exception ex) {
@@ -378,24 +388,33 @@ public class LunaService extends LunaServiceThread {
     
   }
 
+  private int getNextListenerId() {
+    int id = 0;
+    synchronized( listenerCounterLock ){
+      id = LunaService.listenerCounter++;
+    }
+    return id;
+  }
+
   class ConnectionStateListenerImpl implements ConnectionStateListener{
     private final ServiceMessage msg;
     private final VpnConnection conn;
     private int id;
 
-    public ConnectionStateListenerImpl(ServiceMessage msg, VpnConnection conn) {
+    public ConnectionStateListenerImpl(ServiceMessage msg, VpnConnection conn, int myId) {
       this.msg = msg;
       this.conn = conn;
+      this.id = myId;
     }
 
-    public void stateChanged(String profileName, ConnectionState state, int listenerId) {
+    public void stateChanged(String profileName, ConnectionState state) {
       tcpLogger.log("connection " + profileName + ": " + state);
       JSONObject reply = new JSONObject();
       try {
         reply.put("profileName", profileName);
         reply.put("state", state);
         reply.put("stateChanged", true);
-        reply.put("listenerId",listenerId);
+        reply.put("listenerId",this.id);
         reply.put("log", conn.getLog());
         if (state == AbstractVpnConnection.ConnectionState.CONNECTED) {
           reply.put("localAddress", conn.getLocalAddress());
@@ -407,14 +426,6 @@ public class LunaService extends LunaServiceThread {
       } catch (JSONException ex) {
         tcpLogger.log(ex.getMessage(), ex);
       }
-    }
-
-    public int getId() {
-      return this.id;
-    }
-
-    public void setId(int newId) {
-      this.id = newId;
     }
   }
 }
