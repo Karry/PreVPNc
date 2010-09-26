@@ -1,6 +1,7 @@
 package cz.karry.vpnc.connections;
 
 import cz.karry.vpnc.DnsManager;
+import cz.karry.vpnc.DnsSource;
 import cz.karry.vpnc.LunaService;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,11 +26,11 @@ public class PptpConnection extends AbstractVpnConnection {
 
     if (line.startsWith("primary   DNS address ")){
       dnsAdresses.add( line.substring("primary   DNS address ".length()) );
-      DnsManager.getInstance().addNameserver(dnsAdresses.toArray(new String[dnsAdresses.size()]), this);
+      DnsManager.getInstance().addNameserver2(dnsAdresses.toArray(new String[dnsAdresses.size()]), (DnsSource) this);
     }
     if (line.startsWith("secondary DNS address ")){
       dnsAdresses.add( line.substring("secondary DNS address ".length()) );
-      DnsManager.getInstance().addNameserver(dnsAdresses.toArray(new String[dnsAdresses.size()]), this);
+      DnsManager.getInstance().addNameserver2(dnsAdresses.toArray(new String[dnsAdresses.size()]), (DnsSource) this);
     }
   }
 

@@ -6,20 +6,18 @@ import cz.karry.vpnc.connections.VpnConnection.ConnectionState;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  *
  * @author karry
  */
-public class DnsManager {
+public class DnsManager implements Comparator<DnsSource>, DnsSource {
 
   public static final String RESOLVCONF_FILE = LunaService.VPNBOX_DIR + "/etc/resolv.conf";
   private static DnsManager instance;
-  private final Map<Object, String[]> nameservers = new HashMap<Object, String[]>();
-  private final Object lock = new Object();
 
   public static DnsManager getInstance() {
     if (instance == null)
@@ -27,33 +25,39 @@ public class DnsManager {
     return instance;
   }
 
+  private final Map<DnsSource, String[]> nameservers = new TreeMap<DnsSource, String[]>(this);
+  private final Object lock = new Object();
+  private int order;
+
   private DnsManager() {
     synchronized (lock) {
       String[] defaultNameserver = {"127.0.0.1"};
-      nameservers.put(this, defaultNameserver);
-      updateResolvConf();
+      addNameserver2(defaultNameserver, this);
     }
   }
 
-  public String[] addNameserver(String[] ip, final VpnConnection who) {
+  public String[] addNameserver2(String[] ip, final DnsSource who) {
     String all = "";
-    for (int i=0; i<ip.length; i++)
-      all += (i==ip.length-1)? ip[i]: ip[i]+", ";
-    TcpLogger.getInstance().log(" connection "+who+" add dns servers: "+all);
+    for (int i = 0; i < ip.length; i++)
+      all += (i == ip.length - 1) ? ip[i] : ip[i] + ", ";
+    TcpLogger.getInstance().log(" object " + who + " add dns servers: " + all);
 
     synchronized (lock) {
-      who.addStateListener(new ConnectionStateListener() {
+      if (who instanceof VpnConnection) {
+        ((VpnConnection) who).addStateListener(new ConnectionStateListener() {
 
-        public void stateChanged(String profileName, ConnectionState state) {
-          synchronized (lock) {
-            if (state == ConnectionState.INACTIVE || state == ConnectionState.FAILED) {
-              nameservers.remove(who);
-              updateResolvConf();
+          public void stateChanged(String profileName, ConnectionState state) {
+            synchronized (lock) {
+              if (state == ConnectionState.INACTIVE || state == ConnectionState.FAILED) {
+                nameservers.remove(who);
+                updateResolvConf();
+              }
+
             }
-
           }
-        }
-      });
+        });
+      }
+      who.setOrder(nameservers.size());
       String[] old = nameservers.put(who, ip);
       updateResolvConf();
       return old;
@@ -84,5 +88,17 @@ public class DnsManager {
         TcpLogger.getInstance().log("write to resolv.conf file failed", ex);
       }
     }
+  }
+
+  public int compare(DnsSource o1, DnsSource o2) {
+    return o2.getOrder() - o1.getOrder();
+  }
+
+  public void setOrder(int order) {
+    this.order = order;
+  }
+
+  public int getOrder() {
+    return this.order;
   }
 }
