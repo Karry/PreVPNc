@@ -10,7 +10,7 @@ pass=$4
 mppe=$5
 mppe_stateful=$6
 
-ln -sf /etc/resolv.conf /etc/ppp/resolv.conf
+#ln -sf /etc/resolv.conf /etc/ppp/resolv.conf
 cp $VPNROOT/etc/ppp/chap-secrets /tmp/chap-secrets
 cat /tmp/chap-secrets | grep -v "$name" > $VPNROOT/etc/ppp/chap-secrets
 rm /tmp/chap-secrets

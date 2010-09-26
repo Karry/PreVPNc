@@ -24,5 +24,5 @@ if [ -f /media/internal/.vpn/cisco_template ] ; then
     template=/media/internal/.vpn/cisco_template
 fi
 
-cat $template | sed "s/%NAME%/$name/g" | sed "s/%HOST%/$host/g" | sed "s/%USERID%/$userid/g" | sed "s/%USERPASS%/$userpass/g" | sed "s/%USERPASSTYPE%/$userpasstype/g" | sed "s/%GROUPID%/$groupid/g" | sed "s/%GROUPPASS%/$grouppass/g" | sed "s/%GROUPPASSTYPE%/$grouppasstype/g"  > $VPNROOT/tmp/$name.conf
+cat $template | sed "s/%NAME%/$name/g" | sed "s/%HOST%/$host/g" | sed "s/%USERID%/$userid/g" | sed "s/%USERPASS%/$userpass/g" | sed "s/%USERPASSTYPE%/$userpasstype/g" | sed "s/%GROUPID%/$groupid/g" | sed "s/%GROUPPASS%/$grouppass/g" | sed "s/%GROUPPASSTYPE%/$grouppasstype/g"  > $VPNROOT/etc/vpnc/$name.conf
 

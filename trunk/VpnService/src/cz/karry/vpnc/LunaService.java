@@ -35,6 +35,12 @@ public class LunaService extends LunaServiceThread {
 
   public LunaService() {
     super();
+
+    CommandLine cmd = new CommandLine(String.format("%s/scripts/startup.sh", APP_ROOT));
+    if (!cmd.doCmd())
+      tcpLogger.log("startup script fails! "+cmd.getResponse());
+    else
+      tcpLogger.log("startup script successfully edned");
   }
 
   /**

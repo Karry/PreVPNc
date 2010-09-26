@@ -18,5 +18,5 @@ if [ -f /media/internal/.vpn/openvpn_template ] ; then
     template=/media/internal/.vpn/openvpn_template
 fi
 
-cat $template | sed "s/%NAME%/$name/g" | sed "s/%HOST%/$host/g" | sed "s/%TOPOLOGY%/$topology/g" | sed "s/%PROTOCOL%/$protocol/g" | sed "s/%CIPHER%/$cipher/g" | sed "s/%PASS%/$pass/g" > $VPNROOT/tmp/$name.vpn
+cat $template | sed "s/%NAME%/$name/g" | sed "s/%HOST%/$host/g" | sed "s/%TOPOLOGY%/$topology/g" | sed "s/%PROTOCOL%/$protocol/g" | sed "s/%CIPHER%/$cipher/g" | sed "s/%PASS%/$pass/g" > $VPNROOT/etc/openvpn/$name.vpn
 

@@ -10,7 +10,7 @@ public class OpenVPNConnection extends AbstractVpnConnection {
 
   public OpenVPNConnection(String name) {
     super(  name,
-            String.format("chroot " + LunaService.VPNBOX_DIR + " /usr/sbin/openvpn /tmp/%s.vpn", name),
+            String.format("chroot " + LunaService.VPNBOX_DIR + " /usr/sbin/openvpn /etc/openvpn/%s.vpn", name),
             "Initialization Sequence Completed");
   }
 
