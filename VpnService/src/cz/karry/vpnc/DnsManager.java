@@ -49,6 +49,7 @@ public class DnsManager implements Comparator<DnsSource>, DnsSource {
           public void stateChanged(String profileName, ConnectionState state) {
             synchronized (lock) {
               if (state == ConnectionState.INACTIVE || state == ConnectionState.FAILED) {
+                TcpLogger.getInstance().log(" remove dns records from " + who + "");
                 nameservers.remove(who);
                 updateResolvConf();
               }
