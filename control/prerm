@@ -16,6 +16,9 @@ fi
 
 /bin/rm -f /etc/event.d/cz.karry.vpnc
 
+## remove vpnbox directory
+umount -f /opt/vpnbox/etc
+umount -f /opt/vpnbox/proc
 /bin/rm -rf /opt/vpnbox
 
 ## revert /etc/resolv.conf symlink

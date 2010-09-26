@@ -15,7 +15,7 @@ public class CiscoConnection extends AbstractVpnConnection {
 
   public CiscoConnection(String name) {
     super(name,
-            String.format("chroot " + LunaService.VPNBOX_DIR + " /usr/sbin/vpnc --debug 2 --no-detach /tmp/%s", name),
+            String.format("chroot " + LunaService.VPNBOX_DIR + " /usr/sbin/vpnc --debug 2 --no-detach /etc/vpnc/%s", name),
             "vpnc version");
   }
 
