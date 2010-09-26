@@ -29,14 +29,25 @@ MainAssistant.prototype.setup = function(){
 	
     this.controller.listen(this.profileList, Mojo.Event.listAdd, this.listAddHandler.bind(this));
     this.controller.listen(this.profileList, Mojo.Event.listTap, this.handleTrackTap.bind(this));
-	
-	//add = this.addProfile.bind(this);
-	//add({name:"test", state:"???", type:"pptp"});
 
 	VpnManager.getInstance().loadProfiles( this.controller, this.addProfile.bind(this) , this.tableErrorHandler.bind(this));
 	VpnManager.getInstance().addListener(this.update.bind(this));
+	
+	// I don't know why listener sometimes stops working. So We refresh state periodically
+	this.timer = setTimeout(this.updateAll.bind(this), 2000);
 }
 
+MainAssistant.prototype.updateAll = function(){
+	for (i = 0; i< this.currentModel.items.length; i++){
+		VpnManager.getInstance().refreshProfileInfo(
+													this.controller,
+													this.currentModel.items[i],
+													this.update.bind(this),
+													this.tableErrorHandler.bind(this)
+													);
+	}
+	this.timer = setTimeout(this.updateAll.bind(this), 2000);
+}
 
 MainAssistant.prototype.addProfile = function(item){
 	Mojo.Log.error("add profile to model... "+Object.toJSON(item)); 	
@@ -147,6 +158,7 @@ MainAssistant.prototype.routeSetHandler = function(event){
 MainAssistant.prototype.cleanup = function(event){
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
+	clearTimeout( this.timer);
 
 }
 
