@@ -133,29 +133,6 @@ VpnManager.prototype.loadProfiles = function( controller, upatedProfileHandler ,
                                     function(){}
                                     );
                 };
-                
-    /*
-    openVPNConfigLoader = function(vpnManagerObj, controller, item, loadRoutes, routesHandler, tableErrorHandler){
-        vpnManagerObj.executeSQL("SELECT * FROM `vpn_spec_openvpn` WHERE `profile_name` = '"+item.name+"';",
-                        function(transaction2, result2){
-                            try{                                
-                                if (result2.rows.length >= 1){
-                                    Mojo.Log.error("OpenVPN config for '"+item.name+"' selected..."); 
-                                    item2 = Object.clone(result2.rows.item(0));
-                                    // merge results
-                                    for (attrname in item2) {
-                                        item['openvpn_'+attrname] = item2[attrname];
-                                    }
-                                }
-                                loadRoutes(controller, item, routesHandler, tableErrorHandler);
-                                
-                            }catch(e){
-                                Mojo.Log.error("error "+Object.toJSON(e));
-                            }
-                        },
-                        tableErrorHandler);        
-    }
-    */
     
     /**
      * I know, this construction is crazy, bad how to execute many dependent SQL in asynchronous API?
@@ -219,11 +196,11 @@ VpnManager.prototype.refreshProfileInfo = function(controller, profile, upatedPr
 											name: profile.name
 		                                  },
 		                                  onSuccess: function(result){
-                                                Mojo.Log.error("get info... "+Object.toJSON(result)); 
+                                                //Mojo.Log.error("get info... "+Object.toJSON(result)); 
                                                 profile.state = result.state;
                                                 profile.log = result.log;
                                                 profile.localAddress = result.localAddress
-                                                Mojo.Log.error("return... "+Object.toJSON(profile)); 
+                                                //Mojo.Log.error("return... "+Object.toJSON(profile)); 
                                                 upatedProfileHandler( profile );
                                             },
 		                                  onFailure: errorHandler
