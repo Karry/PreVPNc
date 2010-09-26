@@ -1,6 +1,7 @@
 package cz.karry.vpnc.connections;
 
 import cz.karry.vpnc.DnsManager;
+import cz.karry.vpnc.DnsSource;
 import cz.karry.vpnc.LunaService;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,7 +24,7 @@ public class CiscoConnection extends AbstractVpnConnection {
   protected void handleLog(String line) {
     if (line.startsWith("nameserver ")){
       dnsAdresses.add( line.substring("nameserver ".length()) );
-      DnsManager.getInstance().addNameserver(dnsAdresses.toArray(new String[dnsAdresses.size()]), this);
+      DnsManager.getInstance().addNameserver2(dnsAdresses.toArray(new String[dnsAdresses.size()]), (DnsSource)this);
     }
   }
 }

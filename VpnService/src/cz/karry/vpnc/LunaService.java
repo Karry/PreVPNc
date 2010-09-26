@@ -164,7 +164,7 @@ public class LunaService extends LunaServiceThread {
       reply.put("profileName", name);
       reply.put("state", state);
       reply.put("log", log);
-      tcpLogger.log("refresh info: "+reply.toString());
+      //tcpLogger.log("refresh info: "+reply.toString());
       msg.respond(reply.toString());
     } catch (LSException ex) {
       tcpLogger.log(ex.getMessage(), ex);

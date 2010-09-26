@@ -1,10 +1,8 @@
 package cz.karry.vpnc.connections;
 
-import ca.canucksoftware.systoolsmgr.CommandLine;
-import cz.karry.vpnc.LunaService;
+import cz.karry.vpnc.DnsSource;
 import cz.karry.vpnc.TcpLogger;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,7 +11,7 @@ import java.util.List;
  *
  * @author karry
  */
-public abstract class AbstractVpnConnection extends Thread implements VpnConnection{
+public abstract class AbstractVpnConnection extends Thread implements VpnConnection, DnsSource{
 
   private volatile ConnectionState connectionState = ConnectionState.INACTIVE;
   protected final String profileName;
@@ -27,6 +25,7 @@ public abstract class AbstractVpnConnection extends Thread implements VpnConnect
   protected Process process;
   private final String connectedLogPart;
   private final String cmd;
+  private int order;
 
   public AbstractVpnConnection(String name, String command, String connectedLogPart) {
     this.profileName = name;
@@ -80,12 +79,15 @@ public abstract class AbstractVpnConnection extends Thread implements VpnConnect
         stderr = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 
         while (getConnectionState() == ConnectionState.CONNECTING
-                || getConnectionState() == ConnectionState.CONNECTED) {
+                || getConnectionState() == ConnectionState.CONNECTED
+                || getConnectionState() == ConnectionState.DISCONNECTING
+                ) {
 
           String line = null;
           line = stdout.readLine();
 
           if (line == null ) { // || line.length() <= 0
+            TcpLogger.getInstance().log("wait for end...");
             process.waitFor();
 
             // I know, we set redirectErrorStream, but it dosn't work correctly in all cases
@@ -174,6 +176,14 @@ public abstract class AbstractVpnConnection extends Thread implements VpnConnect
   @Override
   public String toString() {
     return this.getClass()+" {" + "profileName=" + profileName + '}';
+  }
+
+  public void setOrder(int order) {
+    this.order = order;
+  }
+
+  public int getOrder() {
+    return this.order;
   }
 
   abstract protected void handleLog(String line);
