@@ -10,7 +10,17 @@ EditAssistant.prototype.setup = function(){
     //this.controller.listen('btn', Mojo.Event.tap, this.buttonEvent.bind(this));
     
     if (!this.profile)
-        this.profile = {type: "PPTP", name: "VPN"+this.formatDate(new Date()), display_name:"preVPNc", configuration: {}};
+        this.profile = {type: "PPTP", name: "VPN"+this.formatDate(new Date()), display_name:"preVPNc",
+			configuration: { // default values for selectors
+				pptp_mppe: "require-mppe\nrequire-mppe-128",
+				pptp_mppe_stateful: "nomppe-stateful",
+				openvpn_topology: "p2p",
+				openvpn_protocol: "tcp",
+				openvpn_cipher: "DES-CFB",
+				cisco_userpasstype: "Xauth password",
+				cisco_grouppasstype: "IPSec secret"
+			}
+			};
     if (!this.profile.routes)
         this.profile.routes = [];
     if (!this.profile.routes[0])
