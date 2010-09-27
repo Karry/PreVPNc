@@ -1,6 +1,6 @@
 
-add localhost to resolv.conf everytime
+use phone notification when lost connection
 
-after disconect all vpns, revert /etc/resolv.conf as symbolic link to /var/run/resolv.conf (?)
+possibility define more route rules
 
-move configuration to tmpfs (RAM) filesystem -> make possible remount filesystem as ro
+add Domain option for Cisco
