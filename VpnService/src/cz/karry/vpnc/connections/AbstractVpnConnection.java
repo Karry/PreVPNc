@@ -26,11 +26,17 @@ public abstract class AbstractVpnConnection extends Thread implements VpnConnect
   private final String connectedLogPart;
   private final String cmd;
   private int order;
+  private final String displayName;
 
-  public AbstractVpnConnection(String name, String command, String connectedLogPart) {
+  public AbstractVpnConnection(String name, String displayName, String command, String connectedLogPart) {
     this.profileName = name;
+    this.displayName = displayName;
     this.cmd = command;
     this.connectedLogPart = connectedLogPart;
+  }
+
+  public String getDisplayName(){
+    return this.displayName;
   }
 
   public String getProfileName() {
@@ -57,7 +63,7 @@ public abstract class AbstractVpnConnection extends Thread implements VpnConnect
   public void setConnectionState(ConnectionState state) {
     if (state != this.connectionState){
       for (ConnectionStateListener listener : stateListeners){
-        listener.stateChanged(profileName,state);
+        listener.stateChanged(this,state);
       }
     }
     this.connectionState = state;

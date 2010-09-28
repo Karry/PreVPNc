@@ -1,0 +1,45 @@
+--- /usr/lib/luna/system/luna-systemui/app/controllers/bar-assistant.js.original	Sat Jul  3 02:12:30 2010
++++ /usr/lib/luna/system/luna-systemui/app/controllers/bar-assistant.js	Tue Sep 28 23:27:46 2010
+@@ -98,7 +98,10 @@
+ 		
+ 		this.setStageControllerActiveToFalse.bind(this).delay(5);	
+ 		
+-		this.currentLocale = Mojo.Locale.getCurrentLocale();				
++		this.currentLocale = Mojo.Locale.getCurrentLocale();
++
++		//Subscribe to vpn service
++		this.initOnServerStart("cz.karry.vpnc", this.vpnInit.bind(this), this.vpnDeInit.bind(this));
+ },
+ 
+ refreshCarrierText: function() {
+@@ -116,6 +119,30 @@
+ 	}
+ 	
+ 	return Mojo.Locale.localizeString(str, this.stringTable);
++},
++
++vpnInit: function(){
++	Mojo.Controller.getAppController().showBanner("VPN service initialized", {source: 'notification'});
++
++	this.controller.serviceRequest('luna://cz.karry.vpnc',
++										{
++										method: 'addEventListener',
++										parameters:{},
++										onSuccess: function(msg){
++												if (msg.state == "FAILED"){
++													Mojo.Controller.getAppController().showBanner(
++														{messageText: "VPN connection \""+msg.displayName+"\" failed",soundClass: "alerts"},
++														{source: 'notification'});
++												}
++										},
++										onFailure: function(e){
++											Mojo.Controller.getAppController().showBanner("request on VPN service failed", {source: 'notification'});
++										}
++										}
++										);
++},
++
++vpnDeInit: function(){
+ },
+ 
+ setStageControllerActiveToFalse: function() {

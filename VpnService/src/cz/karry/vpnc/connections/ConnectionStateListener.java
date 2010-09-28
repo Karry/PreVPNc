@@ -10,6 +10,6 @@ import cz.karry.vpnc.connections.VpnConnection.ConnectionState;
  */
 public interface ConnectionStateListener {
 
-  public void stateChanged(String profileName, ConnectionState state);
+  public void stateChanged(VpnConnection connection, ConnectionState state);
 
 }

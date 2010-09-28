@@ -14,8 +14,8 @@ public class PptpConnection extends AbstractVpnConnection {
 
   private List<String> dnsAdresses = new LinkedList<String>();
 
-  public PptpConnection(String name) {
-    super(  name,
+  public PptpConnection(String name, String displayName) {
+    super(  name, displayName,
             String.format("chroot " + LunaService.VPNBOX_DIR + " /usr/sbin/pppd call %s", name),
             "local  IP address");
   }
