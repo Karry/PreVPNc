@@ -34,7 +34,8 @@ MainAssistant.prototype.setup = function(){
 	VpnManager.getInstance().addListener(this.update.bind(this));
 	
 	// I don't know why listener sometimes stops working. So We refresh state periodically
-	this.timer = setTimeout(this.updateAll.bind(this), 2000);
+	// this isnt probably needed this time... 
+	// this.timer = setTimeout(this.updateAll.bind(this), 2000);
 }
 
 MainAssistant.prototype.updateAll = function(){

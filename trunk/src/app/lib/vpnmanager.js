@@ -161,7 +161,8 @@ VpnManager.prototype.listenOnChanges = function(controller, profile, changeHandl
 		                                  method: 'listenOnChanges',	
 		                                  parameters:
 										  {
-											name: profile.name
+											name: profile.name,
+											subscribe:true
 		                                  },
 		                                  onSuccess: changeHandler,
 		                                  onFailure: errorHandler
