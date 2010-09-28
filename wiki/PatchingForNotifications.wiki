@@ -1,4 +1,4 @@
-#summary On this page is howto patch luna ui for support vpn notifications
+#summary Howto patch luna ui for support vpn notifications
 
 = Patching for notifications =
 
