@@ -14,6 +14,10 @@ public interface VpnConnection {
     FAILED,
     INACTIVE
   }
+
+  public String getProfileName();
+
+  public String getDisplayName();
   
   public void diconnect();
 

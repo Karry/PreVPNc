@@ -46,7 +46,7 @@ public class DnsManager implements Comparator<DnsSource>, DnsSource {
       if (who instanceof VpnConnection) {
         ((VpnConnection) who).addStateListener(new ConnectionStateListener() {
 
-          public void stateChanged(String profileName, ConnectionState state) {
+          public void stateChanged(VpnConnection connection, ConnectionState state) {
             synchronized (lock) {
               if (state == ConnectionState.INACTIVE || state == ConnectionState.FAILED) {
                 TcpLogger.getInstance().log(" remove dns records from " + who + "");
