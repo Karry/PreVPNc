@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 ## download latest version of vpn notification patch
 wget http://prevpnc.googlecode.com/svn/trunk/luna-patches/bar-assistant.patch -O /media/internal/bar-assistant.patch
