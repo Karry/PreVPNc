@@ -8,6 +8,7 @@
 #  %GROUPID%
 #  %GROUPPASS%
 #  %GROUPPASSTYPE%
+#  %DOMAIN%
 
 # --- user-id
 Xauth username %USERID%
@@ -24,3 +25,5 @@ IPSec ID %GROUPID%
 # --- groupe password ----
 %GROUPPASSTYPE% %GROUPPASS%
 
+# ---- Domain YOURDOMAIN
+%DOMAIN%

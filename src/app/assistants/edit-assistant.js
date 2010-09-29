@@ -290,7 +290,19 @@ EditAssistant.prototype.setup = function(){
             enterSubmits: false
         },
 		this.profile.configuration
-    );	
+    );
+    this.controller.setupWidget(
+        "cisco_domain",
+        this.urlAttributes = {
+            modelProperty: "cisco_domain",
+            limitResize: true,
+            textReplacement: false,
+            enterSubmits: false
+        },
+		this.profile.configuration
+    );
+	
+	
     
     this.specificConfig = [];
     this.specificConfig["PPTP"] = { elementId: 'specificPPTP'};

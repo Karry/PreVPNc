@@ -12,6 +12,7 @@ userpasstype=$5
 groupid=$6
 grouppass=$7
 grouppasstype=$8
+domain=$9
 
 script=$ROOT/scripts/vpnc-script
 if [ -f /media/internal/.vpn/vpnc-script ] ; then
@@ -24,5 +25,5 @@ if [ -f /media/internal/.vpn/cisco_template ] ; then
     template=/media/internal/.vpn/cisco_template
 fi
 
-cat $template | sed "s/%NAME%/$name/g" | sed "s/%HOST%/$host/g" | sed "s/%USERID%/$userid/g" | sed "s/%USERPASS%/$userpass/g" | sed "s/%USERPASSTYPE%/$userpasstype/g" | sed "s/%GROUPID%/$groupid/g" | sed "s/%GROUPPASS%/$grouppass/g" | sed "s/%GROUPPASSTYPE%/$grouppasstype/g"  > $VPNROOT/etc/vpnc/$name.conf
+cat $template | sed "s/%NAME%/$name/g" | sed "s/%HOST%/$host/g" | sed "s/%USERID%/$userid/g" | sed "s/%USERPASS%/$userpass/g" | sed "s/%USERPASSTYPE%/$userpasstype/g" | sed "s/%GROUPID%/$groupid/g" | sed "s/%GROUPPASS%/$grouppass/g" | sed "s/%GROUPPASSTYPE%/$grouppasstype/g" | sed "s/%DOMAIN%/$domain/g" > $VPNROOT/etc/vpnc/$name.conf
 
