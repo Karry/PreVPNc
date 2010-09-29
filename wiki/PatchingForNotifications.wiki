@@ -10,4 +10,4 @@ and run script for patching luna ui:
 wget http://prevpnc.googlecode.com/svn/trunk/luna-patches/patchit.sh -O /media/internal/patchit.sh
 /media/internal/patchit.sh
 }}}
-You have to install "GNU patch" before. And keep in your mine, you do this on your own risk.
+You have to install "GNU patch" before. And keep in your mind, you do this on your own risk.
