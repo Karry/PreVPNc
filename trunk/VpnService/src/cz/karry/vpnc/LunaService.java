@@ -187,9 +187,9 @@ public class LunaService extends LunaServiceThread {
     }
   }
 
-  private VpnConnection addManagedConnection(String name, VpnConnection connection){
-    synchronized(vpnConnections){
-      for (ServiceMessage listener :globalListeners){
+  private VpnConnection addManagedConnection(String name, VpnConnection connection) {
+    synchronized (vpnConnections) {
+      for (ServiceMessage listener : globalListeners) {
         connection.addStateListener(new ConnectionStateListenerImpl(listener, connection, getNextListenerId()));
       }
       return vpnConnections.put(name, connection);
@@ -296,7 +296,12 @@ public class LunaService extends LunaServiceThread {
       String grouppass = configuration.getString("cisco_grouppass").replaceAll("\n", "\\\\n");
       String userpasstype = configuration.getString("cisco_userpasstype");
       String grouppasstype = configuration.getString("cisco_grouppasstype");
-      this.connectCiscoVpn(msg, name, displayName, host, userid, userpass, userpasstype, groupid, grouppass, grouppasstype);
+      String domain = configuration.has("cisco_domain")
+              && configuration.getString("cisco_domain") != null
+              && configuration.getString("cisco_domain").trim().length() > 0
+              ? "Domain " + configuration.getString("cisco_domain") : "";
+      tcpLogger.log("use domain \"" + domain + "\"");
+      this.connectCiscoVpn(msg, name, displayName, host, userid, userpass, userpasstype, groupid, grouppass, grouppasstype, domain);
       return;
     }
 
@@ -326,7 +331,7 @@ public class LunaService extends LunaServiceThread {
 
       tcpLogger.log("config writed");
       OpenVPNConnection conn = new OpenVPNConnection(name, displayName);
-      VpnConnection original = addManagedConnection(name, conn); 
+      VpnConnection original = addManagedConnection(name, conn);
       if (original != null)
         original.diconnect();
 
@@ -340,7 +345,7 @@ public class LunaService extends LunaServiceThread {
 
   }
 
-  private void connectPptpVpn(ServiceMessage msg, String name, 
+  private void connectPptpVpn(ServiceMessage msg, String name,
           String displayName,
           String host, String user, String pass, String mppe, String mppe_stateful) throws JSONException, LSException {
     try {
@@ -388,10 +393,11 @@ public class LunaService extends LunaServiceThread {
           String userpasstype,
           String groupid,
           String grouppass,
-          String grouppasstype) throws JSONException, LSException {
+          String grouppasstype,
+          String domain) throws JSONException, LSException {
 
     try {
-      String[] arr = new String[9];
+      String[] arr = new String[10];
       arr[0] = String.format("%s/scripts/write_config_cisco.sh", APP_ROOT);
       arr[1] = String.format("%s", name);
       arr[2] = String.format("%s", host);
@@ -401,6 +407,7 @@ public class LunaService extends LunaServiceThread {
       arr[6] = String.format("%s", groupid);
       arr[7] = String.format("%s", grouppass);
       arr[8] = String.format("%s", grouppasstype);
+      arr[9] = String.format("%s", domain);
 
       CommandLine cmd = new CommandLine(arr);
       if (!cmd.doCmd())
