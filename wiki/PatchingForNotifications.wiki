@@ -2,9 +2,7 @@
 
 = Patching for notifications =
 
-Do you want be notified when your vpn connection fails? Install new snaphot cz.karry.vpnc_0.1.4svn61_all.ipk
-
-and run script for patching luna ui:
+Do you want be notified when your vpn connection fails? Install new version of PreVPNc (>= 0.1.4) and run script for patching luna ui:
 
 {{{
 wget http://prevpnc.googlecode.com/svn/trunk/luna-patches/patchit.sh -O /media/internal/patchit.sh
