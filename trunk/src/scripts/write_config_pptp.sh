@@ -17,6 +17,11 @@ rm /tmp/chap-secrets
 echo "\"$user\" $name \"$pass\" *" >> $VPNROOT/etc/ppp/chap-secrets
 chmod og-r $VPNROOT/etc/ppp/chap-secrets
 
+template=$ROOT/scripts/pptp_template
+if [ -f /media/internal/.vpn/pptp_template ] ; then
+    template=/media/internal/.vpn/pptp_template
+fi
 
-cat $ROOT/scripts/pptp_template | sed "s/%NAME%/$name/" | sed "s/%USER%/$user/" | sed "s/%HOST%/$host/" | sed "s/%MPPE%/$mppe/" | sed "s/%MPPE_STATEFUL%/$mppe_stateful/" > $VPNROOT/etc/ppp/peers/$name
+
+cat $template  | sed "s/%NAME%/$name/" | sed "s/%USER%/$user/" | sed "s/%HOST%/$host/" | sed "s/%MPPE%/$mppe/" | sed "s/%MPPE_STATEFUL%/$mppe_stateful/" > $VPNROOT/etc/ppp/peers/$name
 
