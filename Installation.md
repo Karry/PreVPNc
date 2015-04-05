@@ -11,8 +11,9 @@ You should to [enable developer mode](http://palmwebos.org/2009/09/22/there-are-
   * Download newest version from [Download page](http://code.google.com/p/prevpnc/downloads/list)
   * Load into QuickInstall
   * Enable post-installations scripts in QuickInstall Options
-> > ![http://prevpnc.googlecode.com/svn-history/r78/wiki/images/quickinstall.png](http://prevpnc.googlecode.com/svn-history/r78/wiki/images/quickinstall.png)
   * Install it
+
+<img src="https://raw.githubusercontent.com/Karry/PreVPNc/wiki/images/quickinstall.png" />
 
 # Preware method #
 
