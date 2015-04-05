@@ -2,7 +2,7 @@
 
 The goal of this project is create simple frontend for manage vpn connections on webOS based devices. Currently is supported OpenVPN, Cisco and MS PPTP (pptp only with Palm Pre with kernel version 2.6.24-palm-joplin-3430).
 
-* WARNING: This application is compatible with WebOS 1 only (released in year 2009)! *
+** WARNING: This application is compatible with WebOS 1 only (released in year 2009)! **
 
 
 **For more information and help see Wiki pages:**
