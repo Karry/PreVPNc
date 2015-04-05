@@ -17,8 +17,6 @@ Binary packages (ipk format) are available in "releases" branch. Latest version 
 
 ## Screenshots:
 
-https://raw.githubusercontent.com/Karry/PreVPNc/wiki/screenshots/0.1.0/main.png
-
 <a href='https://raw.githubusercontent.com/Karry/PreVPNc/wiki/screenshots/0.1.0/main.png'><img src='https://raw.githubusercontent.com/Karry/PreVPNc/wiki/screenshots/0.1.0/main.png'  width='200' /></a>
 <a href='https://raw.githubusercontent.com/Karry/PreVPNc/wiki/screenshots/0.1.1/log.png'><img src='https://raw.githubusercontent.com/Karry/PreVPNc/wiki/screenshots/0.1.1/log.png'  width='200' /></a>
 <a href='https://raw.githubusercontent.com/Karry/PreVPNc/wiki/screenshots/0.1.1/menu.png'><img src='https://raw.githubusercontent.com/Karry/PreVPNc/wiki/screenshots/0.1.1/menu.png' width='200' /></a>
