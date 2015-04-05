@@ -1,6 +1,6 @@
 # Diagram #
 
-<a href='http://prevpnc.googlecode.com/svn/wiki/images/howto_setup.svg'><img src='http://prevpnc.googlecode.com/svn/wiki/images/howto_setup.png' alt='VPN diagram' width='800' /></a>
+<a href='https://raw.githubusercontent.com/Karry/PreVPNc/wiki/images/howto_setup.png'><img src='https://raw.githubusercontent.com/Karry/PreVPNc/wiki/images/howto_setup.png'  width='500' /></a>
 
 
 # Setup PPTP VPN server on Windows #
