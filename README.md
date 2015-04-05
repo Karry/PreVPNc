@@ -6,10 +6,10 @@ The goal of this project is create simple frontend for manage vpn connections on
 
 
 **For more information and help see Wiki pages:**
-  * [FAQ](FAQ.md)
-  * [Installation](Installation.md)
-  * [SetupVPNConnection](SetupVPNConnection.md)
-  * [Patching for notifications](PatchingForNotifications.md)
+  * [FAQ](https://github.com/Karry/PreVPNc/blob/wiki/FAQ.md)
+  * [Installation](https://github.com/Karry/PreVPNc/blob/wiki/Installation.md)
+  * [SetupVPNConnection](https://github.com/Karry/PreVPNc/blob/wiki/SetupVPNConnection.md)
+  * [Patching for notifications](https://github.com/Karry/PreVPNc/blob/wiki/PatchingForNotifications.md)
 
 ## Download:
 
