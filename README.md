@@ -48,6 +48,9 @@ Binary packages (ipk format) are available in "releases" branch. Latest version 
     * add Cisco support
     * DNS handling for PPTP and Cisco
     * configuration directory is mouted to ram (tmpfs)
-  * 0.1.2 add OpenVPN support
-  * 0.1.1 add possibility define more vpn profiles
-  * 0.1.0 first release, works with pptp, ui looks terribly
+  * 0.1.2 
+    * add OpenVPN support
+  * 0.1.1 
+    * add possibility define more vpn profiles
+  * 0.1.0 
+    * first release, works with pptp, ui looks terribly
