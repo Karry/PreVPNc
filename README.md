@@ -1,3 +1,5 @@
+<img src="src/images/icon.png" />
+
 # PreVPNc
 
 The goal of this project is create simple frontend for manage vpn connections on webOS based devices. Currently is supported OpenVPN, Cisco and MS PPTP (pptp only with Palm Pre with kernel version 2.6.24-palm-joplin-3430).
